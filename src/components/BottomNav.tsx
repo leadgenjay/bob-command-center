@@ -11,17 +11,17 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/', label: 'Home', icon: Home },
   { href: '/kanban', label: 'Tasks', icon: Kanban },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
-  { href: '/more', label: 'More', icon: MoreHorizontal },
+  { href: '/projects', label: 'Projects', icon: Home },
+  { href: '/decisions', label: 'More', icon: MoreHorizontal },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
 
   // Map more page paths to the "More" tab
-  const isMorePath = ['/projects', '/decisions', '/preferences'].includes(pathname);
+  const isMorePath = ['/decisions', '/preferences'].includes(pathname);
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 frosted-glass-strong border-t border-border/50">
@@ -31,14 +31,14 @@ export function BottomNav() {
       >
         {navItems.map(item => {
           const Icon = item.icon;
-          const isActive = item.href === '/more' 
-            ? isMorePath || pathname === '/more'
-            : pathname === item.href;
+          const isActive = item.href === '/decisions' 
+            ? isMorePath || pathname === '/decisions'
+            : pathname === item.href || (item.href === '/kanban' && pathname === '/');
           
           return (
             <Link
               key={item.href}
-              href={item.href === '/more' ? '/projects' : item.href}
+              href={item.href}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 min-w-[64px] min-h-[44px] py-2 px-3',
                 'transition-all duration-200 active:scale-95',

@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import { BottomNav } from "@/components/BottomNav";
-import { QuickCapture } from "@/components/QuickCapture";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,10 +18,16 @@ export const metadata: Metadata = {
   title: "Bob Command Center",
   description: "Task & project management dashboard for AI-human collaboration",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.svg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Command Center",
+    title: "Bob",
   },
 };
 
@@ -44,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -60,9 +65,6 @@ export default function RootLayout({
         
         {/* Mobile bottom navigation */}
         <BottomNav />
-        
-        {/* Quick capture FAB */}
-        <QuickCapture />
       </body>
     </html>
   );
