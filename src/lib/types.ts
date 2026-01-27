@@ -56,12 +56,12 @@ export interface Decision {
   created_at: string;
 }
 
-export const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; bgColor: string }> = {
-  backlog: { label: 'Backlog', color: 'text-gray-600', bgColor: 'bg-gray-100 dark:bg-gray-800' },
-  todo: { label: 'To Do', color: 'text-blue-600', bgColor: 'bg-blue-50 dark:bg-blue-950' },
-  in_progress: { label: 'In Progress', color: 'text-amber-600', bgColor: 'bg-amber-50 dark:bg-amber-950' },
-  review: { label: 'Review', color: 'text-purple-600', bgColor: 'bg-purple-50 dark:bg-purple-950' },
-  done: { label: 'Done', color: 'text-emerald-600', bgColor: 'bg-emerald-50 dark:bg-emerald-950' },
+export const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; emoji: string; color: string; bgColor: string }> = {
+  backlog: { label: 'Backlog', emoji: '📋', color: 'text-gray-500 dark:text-gray-400', bgColor: 'bg-gray-500/10' },
+  todo: { label: 'To Do', emoji: '📌', color: 'text-blue-500 dark:text-blue-400', bgColor: 'bg-blue-500/10' },
+  in_progress: { label: 'In Progress', emoji: '🔄', color: 'text-amber-500 dark:text-amber-400', bgColor: 'bg-amber-500/10' },
+  review: { label: 'Review', emoji: '👀', color: 'text-purple-500 dark:text-purple-400', bgColor: 'bg-purple-500/10' },
+  done: { label: 'Done', emoji: '✅', color: 'text-emerald-500 dark:text-emerald-400', bgColor: 'bg-emerald-500/10' },
 };
 
 export const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string; icon: string }> = {

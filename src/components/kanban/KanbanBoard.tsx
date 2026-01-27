@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   DragOverlay,
   closestCorners,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragStartEvent,
@@ -18,12 +19,16 @@ import { Task, TaskStatus, TASK_STATUS_CONFIG } from '@/lib/types';
 import { getTasks, updateTask } from '@/lib/store';
 import { KanbanColumn } from './KanbanColumn';
 import { TaskCard } from './TaskCard';
+import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const COLUMNS: TaskStatus[] = ['backlog', 'todo', 'in_progress', 'review', 'done'];
 
 export function KanbanBoard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [activeColumnIndex, setActiveColumnIndex] = useState(1); // Start at "todo"
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setTasks(getTasks());
@@ -33,6 +38,12 @@ export function KanbanBoard() {
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -62,7 +73,6 @@ export function KanbanBoard() {
     const activeTask = tasks.find(t => t.id === activeId);
     if (!activeTask) return;
 
-    // Check if we're over a column
     if (COLUMNS.includes(overId as TaskStatus)) {
       if (activeTask.status !== overId) {
         setTasks(prev =>
@@ -74,7 +84,6 @@ export function KanbanBoard() {
       return;
     }
 
-    // Check if we're over another task
     const overTask = tasks.find(t => t.id === overId);
     if (!overTask) return;
 
@@ -100,11 +109,9 @@ export function KanbanBoard() {
 
     const activeTask = tasks.find(t => t.id === activeId);
     if (activeTask) {
-      // Save to storage
       updateTask(activeId, { status: activeTask.status });
     }
 
-    // Reorder within the same column if needed
     if (activeId !== overId && !COLUMNS.includes(overId as TaskStatus)) {
       const activeIndex = tasks.findIndex(t => t.id === activeId);
       const overIndex = tasks.findIndex(t => t.id === overId);
@@ -121,6 +128,31 @@ export function KanbanBoard() {
     setTasks(getTasks());
   };
 
+  const scrollToColumn = (index: number) => {
+    if (index < 0 || index >= COLUMNS.length) return;
+    setActiveColumnIndex(index);
+    
+    if (scrollContainerRef.current) {
+      const columnWidth = scrollContainerRef.current.scrollWidth / COLUMNS.length;
+      scrollContainerRef.current.scrollTo({
+        left: columnWidth * index,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  // Update active column on scroll
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const scrollLeft = scrollContainerRef.current.scrollLeft;
+      const columnWidth = scrollContainerRef.current.scrollWidth / COLUMNS.length;
+      const newIndex = Math.round(scrollLeft / columnWidth);
+      if (newIndex !== activeColumnIndex) {
+        setActiveColumnIndex(newIndex);
+      }
+    }
+  };
+
   return (
     <DndContext
       sensors={sensors}
@@ -129,15 +161,85 @@ export function KanbanBoard() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="grid grid-cols-5 gap-4 h-full min-h-[600px]">
-        {COLUMNS.map(status => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            tasks={getTasksByStatus(status)}
-            config={TASK_STATUS_CONFIG[status]}
-            onTaskUpdate={refreshTasks}
-          />
+      {/* Mobile column navigation */}
+      <div className="md:hidden flex items-center justify-between mb-4 px-1">
+        <button
+          onClick={() => scrollToColumn(activeColumnIndex - 1)}
+          disabled={activeColumnIndex === 0}
+          className={cn(
+            'h-10 w-10 rounded-xl flex items-center justify-center',
+            'bg-muted transition-all active:scale-95',
+            activeColumnIndex === 0 && 'opacity-30'
+          )}
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+        
+        {/* Column indicators */}
+        <div className="flex gap-2">
+          {COLUMNS.map((status, index) => {
+            const config = TASK_STATUS_CONFIG[status];
+            const count = getTasksByStatus(status).length;
+            return (
+              <button
+                key={status}
+                onClick={() => scrollToColumn(index)}
+                className={cn(
+                  'flex flex-col items-center gap-1 px-2 py-1 rounded-lg',
+                  'transition-all active:scale-95',
+                  index === activeColumnIndex && 'bg-primary/10'
+                )}
+              >
+                <span className="text-lg">{config.emoji}</span>
+                <span className={cn(
+                  'text-[10px] font-medium',
+                  index === activeColumnIndex ? 'text-primary' : 'text-muted-foreground'
+                )}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        
+        <button
+          onClick={() => scrollToColumn(activeColumnIndex + 1)}
+          disabled={activeColumnIndex === COLUMNS.length - 1}
+          className={cn(
+            'h-10 w-10 rounded-xl flex items-center justify-center',
+            'bg-muted transition-all active:scale-95',
+            activeColumnIndex === COLUMNS.length - 1 && 'opacity-30'
+          )}
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Kanban columns */}
+      <div 
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        className={cn(
+          'md:grid md:grid-cols-5 md:gap-4 h-full min-h-[500px]',
+          'flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0',
+          'md:overflow-visible'
+        )}
+      >
+        {COLUMNS.map((status, index) => (
+          <div 
+            key={status} 
+            className={cn(
+              'snap-center shrink-0 w-[85vw] md:w-auto',
+              'pr-4 md:pr-0 last:pr-0'
+            )}
+          >
+            <KanbanColumn
+              status={status}
+              tasks={getTasksByStatus(status)}
+              config={TASK_STATUS_CONFIG[status]}
+              onTaskUpdate={refreshTasks}
+            />
+          </div>
         ))}
       </div>
 

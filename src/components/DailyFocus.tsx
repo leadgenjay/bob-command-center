@@ -1,13 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Task, PRIORITY_CONFIG, TASK_STATUS_CONFIG } from '@/lib/types';
-import { getTodaysFocusTasks, updateTask, getTasks } from '@/lib/store';
+import { Task, PRIORITY_CONFIG } from '@/lib/types';
+import { getTodaysFocusTasks, updateTask } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { Target, Clock, CheckCircle2, Circle, ArrowRight } from 'lucide-react';
+import { Target, Clock, Check } from 'lucide-react';
 import { format } from 'date-fns';
 
 export function DailyFocus() {
@@ -19,18 +17,14 @@ export function DailyFocus() {
   }, []);
 
   const refreshTasks = () => {
-    const tasks = getTodaysFocusTasks();
+    const tasks = getTodaysFocusTasks().slice(0, 5); // Max 5 tasks
     setFocusTasks(tasks);
     setTotalTime(tasks.reduce((sum, t) => sum + (t.time_estimate || 0), 0));
   };
 
-  const handleComplete = (taskId: string) => {
-    updateTask(taskId, { status: 'done' });
-    refreshTasks();
-  };
-
-  const handleMoveToProgress = (taskId: string) => {
-    updateTask(taskId, { status: 'in_progress' });
+  const handleToggleComplete = (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'done' ? 'todo' : 'done';
+    updateTask(taskId, { status: newStatus });
     refreshTasks();
   };
 
@@ -42,87 +36,109 @@ export function DailyFocus() {
     return `${hours}h ${mins}m`;
   };
 
+  const completedCount = focusTasks.filter(t => t.status === 'done').length;
+
   return (
-    <Card className="frosted-glass border-0 shadow-lg">
-      <CardHeader className="pb-3">
+    <Card className="frosted-glass border-0 shadow-lg overflow-hidden">
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
-              <Target className="h-4 w-4 text-white" />
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+              <Target className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle className="text-lg">Daily Focus</CardTitle>
-              <p className="text-xs text-muted-foreground">
-                {format(new Date(), 'EEEE, MMMM d')}
+              <CardTitle className="text-lg">Today&apos;s Focus</CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {format(new Date(), 'EEEE, MMM d')}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span>{formatTime(totalTime)} estimated</span>
-          </div>
+          {totalTime > 0 && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{formatTime(totalTime)}</span>
+            </div>
+          )}
         </div>
+        
+        {/* Progress indicator */}
+        {focusTasks.length > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
+              <span>{completedCount} of {focusTasks.length} complete</span>
+              <span>{Math.round((completedCount / focusTasks.length) * 100)}%</span>
+            </div>
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <div 
+                className="h-full gradient-primary transition-all duration-500 ease-out rounded-full"
+                style={{ width: `${(completedCount / focusTasks.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
       </CardHeader>
-      <CardContent className="space-y-3">
+      
+      <CardContent className="space-y-2 pb-5">
         {focusTasks.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Target className="h-10 w-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No priority tasks for today</p>
-            <p className="text-xs">Add tasks or set high priority to see them here</p>
+          <div className="text-center py-10 text-muted-foreground">
+            <Target className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <p className="text-sm font-medium">No focus tasks</p>
+            <p className="text-xs mt-1">Add high priority tasks to see them here</p>
           </div>
         ) : (
           focusTasks.map((task, index) => {
+            const isCompleted = task.status === 'done';
             const priority = PRIORITY_CONFIG[task.priority];
-            const status = TASK_STATUS_CONFIG[task.status];
+            
             return (
-              <div
+              <button
                 key={task.id}
+                onClick={() => handleToggleComplete(task.id, task.status)}
                 className={cn(
-                  'group flex items-start gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors',
-                  index === 0 && 'ring-1 ring-primary/20 bg-primary/5'
+                  'w-full flex items-center gap-4 p-4 rounded-xl',
+                  'transition-all duration-200 text-left',
+                  'active:scale-[0.98] touch-target',
+                  isCompleted 
+                    ? 'bg-muted/30' 
+                    : index === 0 
+                      ? 'bg-primary/5 ring-1 ring-primary/20' 
+                      : 'bg-muted/50 hover:bg-muted/70'
                 )}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <button
-                  onClick={() => handleComplete(task.id)}
-                  className="mt-0.5 text-muted-foreground hover:text-emerald-500 transition-colors"
-                >
-                  {task.status === 'done' ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-                  ) : (
-                    <Circle className="h-5 w-5" />
+                {/* Large checkbox */}
+                <div
+                  className={cn(
+                    'h-7 w-7 rounded-lg border-2 flex items-center justify-center shrink-0',
+                    'transition-all duration-200',
+                    isCompleted
+                      ? 'bg-emerald-500 border-emerald-500'
+                      : 'border-muted-foreground/30 hover:border-primary'
                   )}
-                </button>
+                >
+                  {isCompleted && <Check className="h-4 w-4 text-white" />}
+                </div>
+                
+                {/* Task content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-medium text-sm">{task.title}</h4>
-                    <div className="flex items-center gap-2">
-                      {task.time_estimate && (
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {formatTime(task.time_estimate)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className={cn('text-xs', priority.color)}>
-                      {priority.icon} {priority.label}
-                    </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {status.label}
-                    </Badge>
+                  <h4 className={cn(
+                    'font-medium text-sm leading-tight truncate',
+                    isCompleted && 'line-through text-muted-foreground'
+                  )}>
+                    {task.title}
+                  </h4>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className={cn('text-xs', priority.color)}>
+                      {priority.icon}
+                    </span>
+                    {task.time_estimate && (
+                      <span className="text-[10px] text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {formatTime(task.time_estimate)}
+                      </span>
+                    )}
                   </div>
                 </div>
-                {task.status === 'todo' && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleMoveToProgress(task.id)}
-                  >
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
+              </button>
             );
           })
         )}

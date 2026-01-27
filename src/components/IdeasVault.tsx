@@ -2,13 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Idea, IdeaCategory, IDEA_CATEGORY_CONFIG, PRIORITY_CONFIG, IdeaStatus } from '@/lib/types';
-import { getIdeas, createIdea, updateIdea, deleteIdea } from '@/lib/store';
+import { getIdeas, updateIdea, deleteIdea } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -16,30 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Lightbulb, Plus, X, Sparkles, Trash2 } from 'lucide-react';
+import { Lightbulb, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 
-const categories: IdeaCategory[] = ['content', 'apps', 'business', 'social'];
+const categories: (IdeaCategory | 'all')[] = ['all', 'content', 'apps', 'business', 'social'];
 
 export function IdeasVault() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeCategory, setActiveCategory] = useState<IdeaCategory | 'all'>('all');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newIdea, setNewIdea] = useState({
-    title: '',
-    description: '',
-    category: 'apps' as IdeaCategory,
-    tags: '',
-    priority: 'medium' as const,
-  });
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     refreshIdeas();
@@ -53,22 +34,8 @@ export function IdeasVault() {
     ? ideas
     : ideas.filter(idea => idea.category === activeCategory);
 
-  const handleCreateIdea = () => {
-    if (!newIdea.title.trim()) return;
-    createIdea({
-      title: newIdea.title,
-      description: newIdea.description || null,
-      category: newIdea.category,
-      tags: newIdea.tags.split(',').map(t => t.trim()).filter(Boolean),
-      priority: newIdea.priority,
-      status: 'captured',
-    });
-    setNewIdea({ title: '', description: '', category: 'apps', tags: '', priority: 'medium' });
-    setIsDialogOpen(false);
-    refreshIdeas();
-  };
-
-  const handleDeleteIdea = (id: string) => {
+  const handleDeleteIdea = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
     deleteIdea(id);
     refreshIdeas();
   };
@@ -78,158 +45,112 @@ export function IdeasVault() {
     refreshIdeas();
   };
 
+  const toggleExpand = (id: string) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
+
   return (
-    <Card className="frosted-glass border-0 shadow-lg h-full">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Lightbulb className="h-4 w-4 text-white" />
-            </div>
-            <CardTitle className="text-lg">Ideas Vault</CardTitle>
+    <Card className="frosted-glass border-0 shadow-lg">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-md">
+            <Lightbulb className="h-5 w-5 text-white" />
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gradient-primary text-white glow-primary">
-                <Plus className="h-4 w-4 mr-1" />
-                Add Idea
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  Capture New Idea
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label>Title</Label>
-                  <Input
-                    value={newIdea.title}
-                    onChange={(e) => setNewIdea({ ...newIdea, title: e.target.value })}
-                    placeholder="What's your idea?"
-                  />
-                </div>
-                <div>
-                  <Label>Description</Label>
-                  <Textarea
-                    value={newIdea.description}
-                    onChange={(e) => setNewIdea({ ...newIdea, description: e.target.value })}
-                    placeholder="Describe your idea..."
-                    rows={3}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Category</Label>
-                    <Select
-                      value={newIdea.category}
-                      onValueChange={(v) => setNewIdea({ ...newIdea, category: v as IdeaCategory })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map(cat => (
-                          <SelectItem key={cat} value={cat}>
-                            {IDEA_CATEGORY_CONFIG[cat].emoji} {IDEA_CATEGORY_CONFIG[cat].label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Priority</Label>
-                    <Select
-                      value={newIdea.priority}
-                      onValueChange={(v) => setNewIdea({ ...newIdea, priority: v as any })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-                          <SelectItem key={key} value={key}>
-                            {config.icon} {config.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <div>
-                  <Label>Tags (comma separated)</Label>
-                  <Input
-                    value={newIdea.tags}
-                    onChange={(e) => setNewIdea({ ...newIdea, tags: e.target.value })}
-                    placeholder="ai, automation, saas"
-                  />
-                </div>
-                <Button onClick={handleCreateIdea} className="w-full gradient-primary text-white">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Save Idea
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <div>
+            <CardTitle className="text-lg">Ideas Vault</CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {ideas.length} ideas captured
+            </p>
+          </div>
+        </div>
+        
+        {/* Horizontally scrollable filter chips */}
+        <div className="scroll-snap-x gap-2 -mx-6 px-6 mt-4 pb-1">
+          {categories.map(cat => {
+            const isActive = activeCategory === cat;
+            const config = cat === 'all' ? null : IDEA_CATEGORY_CONFIG[cat];
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  'filter-chip snap-center-child',
+                  isActive && 'filter-chip-active'
+                )}
+              >
+                {config ? `${config.emoji} ${config.label}` : 'All'}
+              </button>
+            );
+          })}
         </div>
       </CardHeader>
-      <CardContent>
-        <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as any)}>
-          <TabsList className="w-full justify-start mb-4 bg-muted/50">
-            <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-            {categories.map(cat => (
-              <TabsTrigger key={cat} value={cat} className="text-xs">
-                {IDEA_CATEGORY_CONFIG[cat].emoji} {IDEA_CATEGORY_CONFIG[cat].label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
-            {filteredIdeas.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Lightbulb className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm">No ideas yet</p>
-                <p className="text-xs">Start capturing your brilliant thoughts</p>
-              </div>
-            ) : (
-              filteredIdeas.map(idea => {
-                const catConfig = IDEA_CATEGORY_CONFIG[idea.category];
-                const priority = PRIORITY_CONFIG[idea.priority];
-                return (
-                  <div
-                    key={idea.id}
-                    className="group p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-all border border-transparent hover:border-border"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{catConfig.emoji}</span>
-                        <h4 className="font-medium text-sm">{idea.title}</h4>
-                      </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-destructive"
-                        onClick={() => handleDeleteIdea(idea.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    {idea.description && (
-                      <p className="text-xs text-muted-foreground mt-1 ml-7 line-clamp-2">
+      
+      <CardContent className="space-y-3 max-h-[400px] overflow-y-auto scrollbar-hide pb-5">
+        {filteredIdeas.length === 0 ? (
+          <div className="text-center py-10 text-muted-foreground">
+            <Lightbulb className="h-12 w-12 mx-auto mb-3 opacity-20" />
+            <p className="text-sm font-medium">No ideas yet</p>
+            <p className="text-xs mt-1">Tap + to capture your thoughts</p>
+          </div>
+        ) : (
+          filteredIdeas.map((idea, index) => {
+            const catConfig = IDEA_CATEGORY_CONFIG[idea.category];
+            const priority = PRIORITY_CONFIG[idea.priority];
+            const isExpanded = expandedId === idea.id;
+            
+            return (
+              <div
+                key={idea.id}
+                className={cn(
+                  'rounded-xl bg-muted/40 overflow-hidden',
+                  'transition-all duration-200 animate-scale-in',
+                  isExpanded && 'ring-1 ring-primary/20'
+                )}
+                style={{ animationDelay: `${index * 30}ms` }}
+              >
+                {/* Card header - always visible */}
+                <button
+                  onClick={() => toggleExpand(idea.id)}
+                  className={cn(
+                    'w-full flex items-center gap-3 p-4 text-left',
+                    'transition-colors active:bg-muted/60 touch-target'
+                  )}
+                >
+                  <span className="text-xl shrink-0">{catConfig.emoji}</span>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm truncate">{idea.title}</h4>
+                    {!isExpanded && idea.description && (
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
                         {idea.description}
                       </p>
                     )}
-                    <div className="flex items-center gap-2 mt-2 ml-7 flex-wrap">
+                  </div>
+                  {isExpanded ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+                  )}
+                </button>
+                
+                {/* Expanded content */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 space-y-3 animate-slide-up">
+                    {idea.description && (
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {idea.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className={cn('text-xs', priority.color)}>
                         {priority.icon} {priority.label}
                       </Badge>
+                      
                       <Select
                         value={idea.status}
                         onValueChange={(v) => handleStatusChange(idea.id, v as IdeaStatus)}
                       >
-                        <SelectTrigger className="h-6 w-auto text-xs border-0 bg-muted/50">
+                        <SelectTrigger className="h-7 w-auto text-xs border-0 bg-muted/50 gap-1">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -239,18 +160,30 @@ export function IdeasVault() {
                           <SelectItem value="archived">📦 Archived</SelectItem>
                         </SelectContent>
                       </Select>
+                      
                       {idea.tags.map(tag => (
                         <Badge key={tag} variant="secondary" className="text-xs">
                           #{tag}
                         </Badge>
                       ))}
                     </div>
+                    
+                    <button
+                      onClick={(e) => handleDeleteIdea(e, idea.id)}
+                      className={cn(
+                        'flex items-center gap-1.5 text-xs text-destructive/70',
+                        'hover:text-destructive transition-colors mt-2'
+                      )}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete idea
+                    </button>
                   </div>
-                );
-              })
-            )}
-          </div>
-        </Tabs>
+                )}
+              </div>
+            );
+          })
+        )}
       </CardContent>
     </Card>
   );
