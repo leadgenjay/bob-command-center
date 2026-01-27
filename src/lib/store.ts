@@ -1,7 +1,7 @@
 'use client';
 
 import { v4 as uuidv4 } from 'uuid';
-import { Task, Idea, Project, Preference, Decision, TaskStatus, TaskPriority, IdeaCategory, IdeaStatus, ProjectStatus } from './types';
+import { Task, Idea, Project, Preference, Decision, DailyTask, Reminder, TaskStatus, TaskPriority, IdeaCategory, IdeaStatus, ProjectStatus } from './types';
 
 const STORAGE_KEYS = {
   tasks: 'bcc_tasks',
@@ -9,6 +9,8 @@ const STORAGE_KEYS = {
   projects: 'bcc_projects',
   preferences: 'bcc_preferences',
   decisions: 'bcc_decisions',
+  dailyTasks: 'bcc_daily_tasks',
+  reminders: 'bcc_reminders',
 };
 
 // Generic storage helpers
@@ -216,6 +218,87 @@ export function deleteDecision(id: string): boolean {
   if (filtered.length === decisions.length) return false;
   saveToStorage(STORAGE_KEYS.decisions, filtered);
   return true;
+}
+
+// Daily Tasks
+export function getDailyTasks(): DailyTask[] {
+  return getFromStorage<DailyTask>(STORAGE_KEYS.dailyTasks).sort((a, b) => a.order - b.order);
+}
+
+export function createDailyTask(task: Omit<DailyTask, 'id'>): DailyTask {
+  const tasks = getDailyTasks();
+  const newTask: DailyTask = {
+    ...task,
+    id: uuidv4(),
+  };
+  tasks.push(newTask);
+  saveToStorage(STORAGE_KEYS.dailyTasks, tasks);
+  return newTask;
+}
+
+export function updateDailyTask(id: string, updates: Partial<DailyTask>): DailyTask | null {
+  const tasks = getDailyTasks();
+  const index = tasks.findIndex(t => t.id === id);
+  if (index === -1) return null;
+  tasks[index] = { ...tasks[index], ...updates };
+  saveToStorage(STORAGE_KEYS.dailyTasks, tasks);
+  return tasks[index];
+}
+
+export function deleteDailyTask(id: string): boolean {
+  const tasks = getDailyTasks();
+  const filtered = tasks.filter(t => t.id !== id);
+  if (filtered.length === tasks.length) return false;
+  saveToStorage(STORAGE_KEYS.dailyTasks, filtered);
+  return true;
+}
+
+export function resetDailyTasks(): void {
+  const tasks = getDailyTasks();
+  const reset = tasks.map(t => ({ ...t, completed: false }));
+  saveToStorage(STORAGE_KEYS.dailyTasks, reset);
+}
+
+export function setDailyTasks(tasks: DailyTask[]): void {
+  saveToStorage(STORAGE_KEYS.dailyTasks, tasks);
+}
+
+// Reminders
+export function getReminders(): Reminder[] {
+  return getFromStorage<Reminder>(STORAGE_KEYS.reminders);
+}
+
+export function createReminder(reminder: Omit<Reminder, 'id' | 'created_at'>): Reminder {
+  const reminders = getReminders();
+  const newReminder: Reminder = {
+    ...reminder,
+    id: uuidv4(),
+    created_at: new Date().toISOString(),
+  };
+  reminders.push(newReminder);
+  saveToStorage(STORAGE_KEYS.reminders, reminders);
+  return newReminder;
+}
+
+export function updateReminder(id: string, updates: Partial<Reminder>): Reminder | null {
+  const reminders = getReminders();
+  const index = reminders.findIndex(r => r.id === id);
+  if (index === -1) return null;
+  reminders[index] = { ...reminders[index], ...updates };
+  saveToStorage(STORAGE_KEYS.reminders, reminders);
+  return reminders[index];
+}
+
+export function deleteReminder(id: string): boolean {
+  const reminders = getReminders();
+  const filtered = reminders.filter(r => r.id !== id);
+  if (filtered.length === reminders.length) return false;
+  saveToStorage(STORAGE_KEYS.reminders, filtered);
+  return true;
+}
+
+export function setReminders(reminders: Reminder[]): void {
+  saveToStorage(STORAGE_KEYS.reminders, reminders);
 }
 
 // Initialize with sample data if empty

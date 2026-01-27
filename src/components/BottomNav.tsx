@@ -7,13 +7,16 @@ import {
   Home,
   Kanban,
   Lightbulb,
+  FileText,
   MoreHorizontal,
+  Sun,
+  Bell,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/kanban', label: 'Tasks', icon: Kanban },
-  { href: '/ideas', label: 'Ideas', icon: Lightbulb },
-  { href: '/projects', label: 'Projects', icon: Home },
+  { href: '/daily', label: 'Daily', icon: Sun },
+  { href: '/reminders', label: 'Reminders', icon: Bell },
   { href: '/decisions', label: 'More', icon: MoreHorizontal },
 ];
 
@@ -21,7 +24,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   // Map more page paths to the "More" tab
-  const isMorePath = ['/decisions', '/preferences'].includes(pathname);
+  const isMorePath = ['/decisions', '/preferences', '/projects', '/sops', '/ideas'].includes(pathname) || pathname.startsWith('/sops');
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 frosted-glass-strong border-t border-border/50">
@@ -32,7 +35,7 @@ export function BottomNav() {
         {navItems.map(item => {
           const Icon = item.icon;
           const isActive = item.href === '/decisions' 
-            ? isMorePath || pathname === '/decisions'
+            ? isMorePath
             : pathname === item.href || (item.href === '/kanban' && pathname === '/');
           
           return (

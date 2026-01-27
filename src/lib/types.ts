@@ -17,6 +17,24 @@ export interface Task {
   updated_at: string;
 }
 
+export interface DailyTask {
+  id: string;
+  title: string;
+  description: string | null;
+  time: string | null; // e.g., "9:00 AM"
+  completed: boolean;
+  order: number;
+}
+
+export interface Reminder {
+  id: string;
+  text: string;
+  schedule: string; // cron expression or description
+  nextRun: string | null;
+  enabled: boolean;
+  created_at: string;
+}
+
 export interface Idea {
   id: string;
   title: string;
