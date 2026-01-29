@@ -368,6 +368,185 @@ export const sopDatabase: Record<string, SOP> = {
 └─────────────────────────┘
 `,
   },
+  'sop-003': {
+    id: 'sop-003',
+    title: 'Team Task Intake',
+    description: 'How Bob handles task requests from Jay and team members via email or Slack',
+    category: 'Operations',
+    lastUpdated: '2026-01-26',
+    version: '1.0',
+    purpose: 'Ensure tasks from Jay and team members are captured accurately, added to the task list, and confirmed - with minimal back-and-forth.',
+    scope: "This SOP applies when Jay or team members (Madison, Kailey, etc.) CC Bob on emails or send tasks via Slack. Bob processes the request and adds it to Jay's task list for daily review.",
+    prerequisites: [
+      'Bob has access to Gmail (bob@leadgenjay.com)',
+      'Bob has access to Slack',
+      'Bob Command Center is set up for task management',
+    ],
+    steps: [
+      {
+        title: 'Receive Task Request',
+        description: 'Team member CCs Bob on an email or sends a message with a task for Jay.',
+        checklist: [
+          'Identify the sender (Jay, Madison, Kailey, or other team)',
+          'Note the channel (Gmail or Slack)',
+          'Read the full message and any attachments/forwards',
+        ],
+      },
+      {
+        title: 'Understand the Task',
+        description: 'Read and comprehend what needs to be done. If unclear, ask 1-2 clarifying questions MAX.',
+        checklist: [
+          'Identify the core action required',
+          'Note any deadlines or urgency indicators',
+          'Note any relevant links, contacts, or context',
+          'If unclear: ask 1-2 concise questions (no more)',
+          'Do NOT overburden team with excessive questions',
+        ],
+      },
+      {
+        title: 'Document the Task',
+        description: 'Create a clear, actionable task summary with source tracking.',
+        checklist: [
+          'Write a clear task title',
+          'Include key details in description',
+          'Record WHO submitted it (name)',
+          'Record WHAT PLATFORM (Gmail, Slack, iMessage)',
+          'Set appropriate priority (urgent/high/medium/low)',
+          'Set due date if specified or implied',
+          'Add to Bob Command Center task list',
+        ],
+      },
+      {
+        title: 'Confirm Receipt',
+        description: 'Reply all to confirm the task has been captured.',
+        checklist: [
+          'Reply all to the original thread',
+          "State that task has been added to Jay's list",
+          'Include brief task summary for confirmation',
+          'Mention it will be reviewed together',
+        ],
+      },
+      {
+        title: 'Archive the Message',
+        description: 'Once documented and confirmed, archive the message from the inbox.',
+        checklist: [
+          'Gmail: Archive the thread',
+          'Slack: Mark as complete or archive',
+          'Keeps inbox clean for new items',
+        ],
+      },
+      {
+        title: 'Daily Review with Jay',
+        description: 'Review all captured tasks with Jay daily to prioritize and complete.',
+        checklist: [
+          'Go through task list together',
+          'Clarify any remaining questions',
+          'Prioritize and assign due dates',
+          'Work on completing tasks',
+          'Move completed items to Done',
+        ],
+      },
+      {
+        title: 'Notify Requester When Done',
+        description: 'Once task is completed, notify the person who submitted it.',
+        checklist: [
+          'Check WHO submitted the task',
+          'Check WHAT PLATFORM they used',
+          'Send completion notification via same platform',
+          'Brief message: task has been addressed/fixed',
+        ],
+      },
+    ],
+    expectedOutcomes: [
+      'All team task requests are captured accurately',
+      'Requester and platform tracked for each task',
+      'Minimal back-and-forth with team members (1-2 questions max)',
+      'Tasks are confirmed via reply-all',
+      'Inbox stays clean (messages archived after processing)',
+      'Jay reviews tasks daily with Bob',
+      'Requesters notified when their task is completed',
+    ],
+    troubleshooting: [
+      {
+        issue: 'Task is completely unclear',
+        solution: "Ask 1-2 specific clarifying questions. Keep questions concise. Jay can often figure it out with minimal info.",
+      },
+      {
+        issue: 'Multiple tasks in one email',
+        solution: 'Create separate task entries for each distinct action item.',
+      },
+      {
+        issue: "Urgent task that can't wait for daily review",
+        solution: 'Flag to Jay immediately via iMessage with task summary.',
+      },
+      {
+        issue: "Task requires information Bob doesn't have access to",
+        solution: "Note what's needed in the task description. Jay will provide during review.",
+      },
+    ],
+    flowchart: `
+┌─────────────────────────┐
+│ Team CCs Bob on Email/  │
+│ Sends Task via Slack    │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│ Read & Understand Task  │
+└───────────┬─────────────┘
+            │
+      ┌─────┴─────┐
+      │           │
+    Clear      Unclear
+      │           │
+      │           ▼
+      │    ┌─────────────┐
+      │    │ Ask 1-2     │
+      │    │ Questions   │
+      │    │ (MAX)       │
+      │    └──────┬──────┘
+      │           │
+      └─────┬─────┘
+            │
+            ▼
+┌─────────────────────────┐
+│ Create Task Entry       │
+│ (title, description,    │
+│  priority, due date)    │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│ Reply All: "Added to    │
+│ Jay's list, will review"│
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│ Archive Message         │
+│ (Gmail/Slack)           │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│ Daily Review with Jay   │
+└───────────┬─────────────┘
+            │
+      ┌─────┴─────┐
+      │           │
+  Complete    Not Done
+      │           │
+      ▼           │
+┌─────────────┐   │
+│ Notify      │   │
+│ Requester   │   │
+│ (same       │   │
+│ platform)   │   │
+└─────────────┘   │
+                  │
+      ◄───────────┘
+`,
+  },
 };
 
 export const sopList = Object.values(sopDatabase).map(sop => ({

@@ -15,6 +15,7 @@ import {
   X,
   Bell,
   Sun,
+  Files,
 } from 'lucide-react';
 
 const navItems = [
@@ -22,7 +23,7 @@ const navItems = [
   { href: '/daily', label: 'Daily', icon: Sun },
   { href: '/reminders', label: 'Reminders', icon: Bell },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
-  { href: '/projects', label: 'Projects', icon: FolderKanban },
+  { href: '/documents', label: 'Docs', icon: Files },
   { href: '/sops', label: 'SOPs', icon: FileText },
 ];
 

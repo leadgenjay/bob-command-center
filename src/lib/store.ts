@@ -11,7 +11,11 @@ const STORAGE_KEYS = {
   decisions: 'bcc_decisions',
   dailyTasks: 'bcc_daily_tasks',
   reminders: 'bcc_reminders',
+  dataVersion: 'bcc_data_version',
 };
+
+// Increment this to force a one-time data reset for all users
+const CURRENT_DATA_VERSION = 5;
 
 // Generic storage helpers
 function getFromStorage<T>(key: string): T[] {
@@ -305,41 +309,71 @@ export function setReminders(reminders: Reminder[]): void {
 export function initializeSampleData(): void {
   if (typeof window === 'undefined') return;
   
+  // Check if we need to reset data due to version change
+  const storedVersion = localStorage.getItem(STORAGE_KEYS.dataVersion);
+  const needsReset = storedVersion !== String(CURRENT_DATA_VERSION);
+  
+  if (needsReset) {
+    // Clear all existing data
+    Object.values(STORAGE_KEYS).forEach(key => {
+      if (key !== STORAGE_KEYS.dataVersion) {
+        localStorage.removeItem(key);
+      }
+    });
+    // Update version
+    localStorage.setItem(STORAGE_KEYS.dataVersion, String(CURRENT_DATA_VERSION));
+  }
+  
   // Only initialize if storage is empty
   if (getTasks().length === 0) {
     const sampleTasks: Omit<Task, 'id' | 'created_at' | 'updated_at'>[] = [
-      { title: 'Review PR for auth system', description: 'Check security implementation', status: 'review', priority: 'high', project_id: null, due_date: new Date().toISOString().split('T')[0], time_estimate: 30 },
-      { title: 'Design new dashboard layout', description: 'Create wireframes for v2', status: 'in_progress', priority: 'medium', project_id: null, due_date: null, time_estimate: 120 },
-      { title: 'Write documentation', description: 'API endpoints and examples', status: 'todo', priority: 'medium', project_id: null, due_date: null, time_estimate: 60 },
-      { title: 'Fix mobile responsiveness', description: 'Navigation menu issues on iOS', status: 'backlog', priority: 'low', project_id: null, due_date: null, time_estimate: 45 },
-      { title: 'Set up CI/CD pipeline', description: 'GitHub Actions workflow', status: 'done', priority: 'high', project_id: null, due_date: null, time_estimate: 90 },
+      // Upcoming tasks
+      { title: 'Fix affiliate attribution - Jorge Hernandez', description: 'Affiliate Ian (ian@leadgenjay.com) needs attribution confirmed for customer quantumhumanusoutlook.com. [Submitted by: Madison | Platform: Gmail]', status: 'todo', priority: 'high', project_id: null, due_date: '2026-01-27', time_estimate: 15 },
+      { title: 'Set up Bob messaging monitoring', description: 'Configure Bob to monitor iMessage, Slack, and Email for action items and create daily task summaries', status: 'todo', priority: 'high', project_id: null, due_date: '2026-01-27', time_estimate: 60 },
+      { title: 'DASH cold email system call', description: 'Meeting with Ronald Hans to discuss cold email system for DASH', status: 'todo', priority: 'high', project_id: null, due_date: '2026-01-28', time_estimate: 30 },
+      { title: 'Review Bob Command Center SOPs', description: 'Go through existing SOPs and identify gaps or improvements needed', status: 'backlog', priority: 'medium', project_id: null, due_date: null, time_estimate: 45 },
+      { title: 'Train Bob on client communication style', description: 'Provide examples of preferred email tone and scheduling language', status: 'backlog', priority: 'medium', project_id: null, due_date: null, time_estimate: 30 },
+      // Completed tasks - Jan 26, 2026
+      { title: 'Deploy Bob Command Center', description: 'Set up and deploy the app to bob.nextwave.io via Vercel', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 30 },
+      { title: 'Add Reminders page to app', description: 'Create /reminders page for viewing and managing scheduled reminders', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 20 },
+      { title: 'Add Daily Tasks page to app', description: 'Create /daily page for recurring daily routine tasks', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 20 },
+      { title: 'Set up 8am Calendar Management cron', description: 'Daily cron job to review calendar and send morning briefing', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 10 },
+      { title: 'Set up Email Check cron (every 10 min)', description: 'Automated email monitoring for new messages requiring action', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 10 },
+      { title: 'Test Calendar Management SOP', description: 'End-to-end test with Madison meeting scheduling request', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 15 },
+      { title: 'Send scheduling email to Madison', description: 'Proposed Wednesday meeting times per Calendar SOP', status: 'done', priority: 'medium', project_id: null, due_date: '2026-01-26', time_estimate: 5 },
+      { title: 'Fix app navigation', description: 'Restored SOPs and Ideas tabs that were accidentally removed', status: 'done', priority: 'medium', project_id: null, due_date: '2026-01-26', time_estimate: 10 },
+      { title: 'Replace placeholder data with real content', description: 'Updated all sample tasks, ideas, projects, and decisions with real data', status: 'done', priority: 'medium', project_id: null, due_date: '2026-01-26', time_estimate: 15 },
+      { title: 'Add data reset mechanism', description: 'Version-based auto-reset for forcing data updates across all users', status: 'done', priority: 'medium', project_id: null, due_date: '2026-01-26', time_estimate: 10 },
+      { title: 'Create Calendar Management SOP', description: 'Documented full SOP for daily calendar review and meeting scheduling', status: 'done', priority: 'high', project_id: null, due_date: '2026-01-26', time_estimate: 30 },
+      { title: 'Create SOP Creation SOP', description: 'Meta-SOP for how to create and maintain SOPs', status: 'done', priority: 'medium', project_id: null, due_date: '2026-01-26', time_estimate: 20 },
     ];
     sampleTasks.forEach(createTask);
   }
 
   if (getIdeas().length === 0) {
     const sampleIdeas: Omit<Idea, 'id' | 'created_at' | 'updated_at'>[] = [
-      { title: 'AI-powered code review tool', description: 'Automate PR reviews with GPT', category: 'apps', tags: ['ai', 'automation', 'developer-tools'], priority: 'high', status: 'developing' },
-      { title: 'Weekly tech newsletter', description: 'Curated dev news and tutorials', category: 'content', tags: ['writing', 'newsletter'], priority: 'medium', status: 'captured' },
-      { title: 'Discord bot for team standup', description: 'Async standups in Slack/Discord', category: 'apps', tags: ['bot', 'productivity'], priority: 'low', status: 'captured' },
-      { title: 'Freelance consulting service', description: 'AI integration consulting', category: 'business', tags: ['consulting', 'ai'], priority: 'medium', status: 'developing' },
+      { title: 'AI-powered lead qualification', description: 'Use Bob to pre-qualify inbound leads based on criteria before scheduling calls', category: 'business', tags: ['ai', 'automation', 'leads'], priority: 'high', status: 'captured' },
+      { title: 'Automated follow-up sequences', description: 'Bob sends follow-up emails to prospects who go quiet after initial contact', category: 'business', tags: ['automation', 'email', 'sales'], priority: 'medium', status: 'captured' },
+      { title: 'Weekly client check-in automation', description: 'Bob drafts personalized check-in emails for active clients', category: 'business', tags: ['automation', 'client-success'], priority: 'medium', status: 'captured' },
+      { title: 'Voice memo to task extraction', description: 'Send Bob a voice memo and have it extracted into actionable tasks', category: 'apps', tags: ['ai', 'productivity'], priority: 'low', status: 'captured' },
     ];
     sampleIdeas.forEach(createIdea);
   }
 
   if (getProjects().length === 0) {
     const sampleProjects: Omit<Project, 'id' | 'created_at' | 'updated_at'>[] = [
-      { name: 'Command Center', description: 'Personal task management dashboard', status: 'active', color: '#ED0D51' },
-      { name: 'API Gateway', description: 'Centralized API management service', status: 'active', color: '#8B5CF6' },
-      { name: 'Mobile App v2', description: 'React Native app redesign', status: 'paused', color: '#10B981' },
+      { name: 'Bob Command Center', description: 'Task management and SOP dashboard for AI-human collaboration', status: 'active', color: '#ED0D51' },
+      { name: 'Lead Gen Jay Operations', description: 'Core business operations and client management', status: 'active', color: '#3B82F6' },
+      { name: 'Bob AI Assistant', description: 'Ongoing development and training of Bob capabilities', status: 'active', color: '#8B5CF6' },
     ];
     sampleProjects.forEach(createProject);
   }
 
   if (getDecisions().length === 0) {
     const sampleDecisions: Omit<Decision, 'id' | 'created_at'>[] = [
-      { title: 'Use Next.js 15 for new projects', context: 'Evaluated between Remix, Astro, and Next.js. Next.js has better ecosystem support.', outcome: 'All new web projects will use Next.js 15 with App Router', tags: ['tech-stack', 'frontend'] },
-      { title: 'Supabase over Firebase', context: 'Need PostgreSQL for relational data. Firebase NoSQL is too limiting.', outcome: 'Migrating to Supabase for new backend projects', tags: ['tech-stack', 'backend'] },
+      { title: 'Bob handles calendar scheduling', context: 'Need consistent, preference-aware scheduling without manual back-and-forth. Bob manages all meeting scheduling following the Calendar Management SOP.', outcome: 'Bob checks calendar, proposes times, gets approval, sends to clients', tags: ['operations', 'bob'] },
+      { title: 'No calls before 10 AM', context: 'Mornings are for deep work and personal training. Scheduling preference to protect morning focus time.', outcome: 'Bob only proposes meeting times 10 AM or later', tags: ['preferences', 'calendar'] },
+      { title: 'Bob Command Center for task management', context: 'Things 3 not installed, need something Bob can directly access. Use bob.nextwave.io instead of external apps.', outcome: 'All tasks, ideas, and SOPs managed through Bob Command Center', tags: ['tools', 'operations'] },
     ];
     sampleDecisions.forEach(createDecision);
   }

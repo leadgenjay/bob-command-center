@@ -4,19 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import {
-  Home,
   Kanban,
   Lightbulb,
   FileText,
   MoreHorizontal,
   Sun,
-  Bell,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/kanban', label: 'Tasks', icon: Kanban },
   { href: '/daily', label: 'Daily', icon: Sun },
-  { href: '/reminders', label: 'Reminders', icon: Bell },
+  { href: '/ideas', label: 'Ideas', icon: Lightbulb },
+  { href: '/sops', label: 'SOPs', icon: FileText },
   { href: '/decisions', label: 'More', icon: MoreHorizontal },
 ];
 
@@ -24,7 +23,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   // Map more page paths to the "More" tab
-  const isMorePath = ['/decisions', '/preferences', '/projects', '/sops', '/ideas'].includes(pathname) || pathname.startsWith('/sops');
+  const isMorePath = ['/decisions', '/preferences', '/projects', '/reminders', '/documents'].includes(pathname);
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 frosted-glass-strong border-t border-border/50">
@@ -36,6 +35,8 @@ export function BottomNav() {
           const Icon = item.icon;
           const isActive = item.href === '/decisions' 
             ? isMorePath
+            : item.href === '/sops'
+            ? pathname.startsWith('/sops')
             : pathname === item.href || (item.href === '/kanban' && pathname === '/');
           
           return (
