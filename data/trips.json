@@ -1,0 +1,87 @@
+[
+  {
+    "id": "trip-demo-001",
+    "name": "Sample Trip (Demo)",
+    "destination": "Miami, FL",
+    "status": "upcoming",
+    "startDate": "2026-03-15",
+    "endDate": "2026-03-18",
+    "tripItUrl": null,
+    "timezone": "America/New_York",
+    "notes": [
+      {
+        "id": "note-1",
+        "content": "This is a demo trip to show the feature. Delete and replace with real trips!",
+        "createdAt": "2026-01-30T12:00:00.000Z"
+      }
+    ],
+    "itinerary": [
+      {
+        "id": "item-1",
+        "type": "flight",
+        "date": "2026-03-15",
+        "time": "08:00",
+        "title": "Depart CLT → MIA",
+        "details": {
+          "airline": "American Airlines",
+          "flightNumber": "AA1234",
+          "departure": "CLT",
+          "arrival": "MIA",
+          "departureTime": "08:00",
+          "arrivalTime": "10:30",
+          "confirmationNumber": "ABC123"
+        }
+      },
+      {
+        "id": "item-2",
+        "type": "hotel",
+        "date": "2026-03-15",
+        "time": "15:00",
+        "title": "Check-in: Hotel Example",
+        "details": {
+          "name": "Hotel Example Miami",
+          "address": "123 Ocean Drive, Miami Beach, FL",
+          "checkIn": "2026-03-15T15:00:00",
+          "checkOut": "2026-03-18T11:00:00",
+          "confirmationNumber": "HTL456",
+          "phone": "+1-305-555-1234"
+        }
+      },
+      {
+        "id": "item-3",
+        "type": "activity",
+        "date": "2026-03-16",
+        "time": "19:00",
+        "title": "Dinner at Joe's Stone Crab",
+        "details": {
+          "location": "11 Washington Ave, Miami Beach",
+          "confirmationNumber": "RES789",
+          "notes": "Reservation for 2"
+        }
+      },
+      {
+        "id": "item-4",
+        "type": "flight",
+        "date": "2026-03-18",
+        "time": "14:00",
+        "title": "Return MIA → CLT",
+        "details": {
+          "airline": "American Airlines",
+          "flightNumber": "AA5678",
+          "departure": "MIA",
+          "arrival": "CLT",
+          "departureTime": "14:00",
+          "arrivalTime": "16:30",
+          "confirmationNumber": "ABC123"
+        }
+      }
+    ],
+    "packing": [
+      { "id": "pack-1", "item": "Passport/ID", "packed": false },
+      { "id": "pack-2", "item": "Phone charger", "packed": false },
+      { "id": "pack-3", "item": "Sunscreen", "packed": false }
+    ],
+    "createdAt": "2026-01-30T12:00:00.000Z",
+    "updatedAt": "2026-01-30T12:00:00.000Z"
+  }
+]

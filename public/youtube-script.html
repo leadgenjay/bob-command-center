@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clawdbot YouTube Script - Draft v1</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #f39c12, #e74c3c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #888;
+      font-size: 1.1rem;
+    }
+    .meta {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      background: rgba(255,255,255,0.05);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+    }
+    .section {
+      background: rgba(255,255,255,0.03);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 20px;
+      border-left: 4px solid #f39c12;
+    }
+    .section h2 {
+      color: #f39c12;
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .timestamp {
+      background: #e74c3c;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: normal;
+    }
+    .section p, .section li {
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+    .section ul {
+      margin-left: 20px;
+    }
+    .highlight {
+      background: rgba(243, 156, 18, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    code {
+      background: rgba(0,0,0,0.4);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Monaco', monospace;
+      font-size: 0.9rem;
+      color: #4ade80;
+    }
+    .code-block {
+      background: rgba(0,0,0,0.4);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-family: 'Monaco', monospace;
+      font-size: 0.9rem;
+      color: #4ade80;
+      overflow-x: auto;
+    }
+    .title-options {
+      background: rgba(243, 156, 18, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .title-options h3 {
+      color: #f39c12;
+      margin-bottom: 15px;
+    }
+    .title-options ol {
+      margin-left: 20px;
+    }
+    .title-options li {
+      padding: 8px 0;
+      font-style: italic;
+    }
+    .notes {
+      background: rgba(231, 76, 60, 0.1);
+      border-left-color: #e74c3c;
+    }
+    .notes h2 {
+      color: #e74c3c;
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🦞 Clawdbot YouTube Script</h1>
+      <p class="subtitle">DRAFT v1 - Ready for Review</p>
+      <div class="meta">
+        <span class="meta-item">📺 12-15 min target</span>
+        <span class="meta-item">🎯 Practical + Honest</span>
+        <span class="meta-item">👥 Tech-curious audience</span>
+      </div>
+    </header>
+
+    <div class="title-options">
+      <h3>📝 Working Title Options</h3>
+      <ol>
+        <li>"Clawdbot: The AI That Works While You Sleep (Complete Setup Guide)"</li>
+        <li>"How I Got a 24/7 AI Employee for $20/month (Clawdbot Tutorial)"</li>
+        <li>"Clawdbot Changed How I Work - Here's My Honest Review + Setup"</li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">0:00 - 0:45</span> HOOK</h2>
+      <p>Everyone's losing their minds over Clawdbot right now. And honestly? I get it.</p>
+      <p>Imagine waking up to find your AI has already:</p>
+      <ul>
+        <li>Checked your emails and flagged what matters</li>
+        <li>Researched that topic you mentioned yesterday</li>
+        <li>Created a task list based on your calendar</li>
+        <li>Even drafted responses to messages</li>
+      </ul>
+      <p>This isn't science fiction. This is what Clawdbot does. <span class="highlight">Right now. Today.</span></p>
+      <p>But here's what nobody's telling you: there's a right way and a wrong way to set this up. And the wrong way could cost you hundreds of dollars or expose your data.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">0:45 - 3:00</span> WHAT IS CLAWDBOT?</h2>
+      <p>First, let's clear up the confusion. <span class="highlight">Clawdbot is NOT Claude Code.</span> They're completely different.</p>
+      <p><strong>Claude Code</strong> = Anthropic's coding assistant (terminal)</p>
+      <p><strong>Clawdbot</strong> = Open-source gateway connecting AI to messaging apps (WhatsApp, Telegram, iMessage, Discord)</p>
+      <p>The key word: <span class="highlight">PROACTIVE</span>. Most AI tools wait for you to ask. Clawdbot can take initiative.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">3:00 - 5:00</span> DO YOU NEED A MAC MINI?</h2>
+      <p><strong>Option 1:</strong> Your existing computer (Free, but needs to stay on)</p>
+      <p><strong>Option 2:</strong> Cloud server / VPS ($5-20/month)</p>
+      <p><strong>Option 3:</strong> Dedicated Mac Mini ($599 one-time) ✅ Recommended</p>
+      <p><em>Start with your existing computer to test. Upgrade when hooked.</em></p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">5:00 - 9:00</span> HOW TO SET IT UP</h2>
+      <div class="code-block">
+# Step 1: Install Node.js 22+
+
+# Step 2: Install Clawdbot
+npm install -g clawdbot@latest
+
+# Step 3: Run setup wizard
+clawdbot onboard --install-daemon
+
+# Step 4: Connect messaging app
+clawdbot channels login
+
+# Step 5: Start Gateway
+clawdbot gateway
+      </div>
+      <p>That's it. You now have an AI you can text.</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">9:00 - 12:00</span> USE CASES THAT MATTER</h2>
+      <p><strong>1. Morning Brief</strong> - Daily summary via cron (calendar, emails, tasks)</p>
+      <p><strong>2. Proactive Research</strong> - Monitor competitors/trends</p>
+      <p><strong>3. Always-On Assistant</strong> - Text it like an assistant, from anywhere</p>
+      <p><strong>4. Autonomous Work (Advanced)</strong> - Give context, let it be proactive</p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">12:00 - 13:30</span> SECURITY REALITY</h2>
+      <ul>
+        <li>Use a dedicated machine</li>
+        <li>Limit access - start small</li>
+        <li>Use read-only where possible</li>
+        <li>Set up allowlists</li>
+        <li>Review the code (it's open source)</li>
+      </ul>
+      <p><em>Honest truth: Bleeding-edge tech = accept some risk while being smart.</em></p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">13:30 - 14:30</span> COSTS</h2>
+      <p><strong>Clawdbot:</strong> Free (open source)</p>
+      <p><strong>AI API:</strong> $1-5/day minimum, power users $50-100/month</p>
+      <p><strong>Hardware:</strong> $599 Mac Mini or $5-20/month VPS</p>
+      <p><em>Pro tip: Use different models for different tasks - cut costs 50-70%</em></p>
+    </div>
+
+    <div class="section">
+      <h2><span class="timestamp">14:30 - 15:30</span> HONEST TAKE + CTA</h2>
+      <p>Ready for everyone? <strong>No.</strong></p>
+      <p>The future of AI interaction? <strong>Absolutely.</strong></p>
+      <p>CTA: "What would YOU have your AI do first?"</p>
+    </div>
+
+    <div class="section notes">
+      <h2>🎬 PRODUCTION NOTES</h2>
+      <p><strong>Thumbnail ideas:</strong> Split screen (sleeping/AI working), "24/7 AI Employee" text</p>
+      <p><strong>B-roll needed:</strong> Terminal commands, notifications, Mac Mini setup, calendar examples</p>
+      <p><strong>Key differentiators:</strong> More practical, honest security talk, clear costs, specific use cases</p>
+    </div>
+
+    <footer>
+      <p>Generated by Bob 🤖 | Ready for Jay's review</p>
+    </footer>
+  </div>
+</body>
+</html>

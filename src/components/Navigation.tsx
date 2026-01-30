@@ -16,11 +16,13 @@ import {
   Bell,
   Sun,
   Files,
+  Plane,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/kanban', label: 'Tasks', icon: Kanban },
   { href: '/daily', label: 'Daily', icon: Sun },
+  { href: '/trips', label: 'Trips', icon: Plane },
   { href: '/reminders', label: 'Reminders', icon: Bell },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
   { href: '/documents', label: 'Docs', icon: Files },

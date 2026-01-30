@@ -547,6 +547,363 @@ export const sopDatabase: Record<string, SOP> = {
       ◄───────────┘
 `,
   },
+
+
+  'sop-004': {
+    id: 'sop-004',
+    title: 'YouTube Scriptwriting',
+    description: 'Research-driven process for writing YouTube scripts using Apify to analyze top videos',
+    category: 'Marketing',
+    lastUpdated: '2026-01-29',
+    version: '1.0',
+    purpose: 'Create data-driven YouTube scripts by researching top-performing videos, extracting transcripts and comments, and using insights to write compelling content.',
+    scope: 'This SOP applies when Jay wants to create a YouTube video script on any topic. Bob handles research, analysis, script writing, and publishing to the Bob App.',
+    prerequisites: [
+      'Apify account with access to YouTube scrapers',
+      'Topic or subject for the video',
+      'Bob Command Center deployed for publishing',
+      'Vercel token configured for deployments',
+    ],
+    steps: [
+      {
+        title: 'Research Top Videos (Apify)',
+        description: 'Use Apify YouTube Scraper to find top-performing videos on the topic from the past 30 days.',
+        checklist: [
+          'Search YouTube via Apify for [TOPIC]',
+          'Filter: Upload date = Last 30 days',
+          'Sort by: View count (descending)',
+          'Collect top 10-20 videos',
+          'Extract: URL, title, views, likes, comments, channel, duration',
+        ],
+      },
+      {
+        title: 'Extract Transcripts',
+        description: 'Get full transcripts from the top-performing videos for analysis.',
+        checklist: [
+          'Use Apify YouTube Transcript Scraper',
+          'Input video URLs from step 1',
+          'Extract full text with timestamps',
+          'Save transcripts for analysis',
+        ],
+      },
+      {
+        title: 'Analyze Transcripts',
+        description: 'Study winning patterns from successful videos.',
+        checklist: [
+          'Analyze hook structure (first 30 seconds)',
+          'Map content flow and segments',
+          'Note CTA placement and phrasing',
+          'Identify key phrases and terminology',
+          'Calculate average video length for topic',
+        ],
+      },
+      {
+        title: 'Extract & Analyze Comments',
+        description: 'Understand audience sentiment, questions, and desires.',
+        checklist: [
+          'Use Apify YouTube Comment Scraper',
+          'Get top 100 comments per video (by likes)',
+          'Identify common questions (FAQ opportunities)',
+          'Note pain points mentioned',
+          'Find what viewers loved',
+          'Find what viewers wanted more of',
+          'Document objections/skepticism',
+        ],
+      },
+      {
+        title: 'Compile Research Summary',
+        description: 'Synthesize all research into actionable insights.',
+        checklist: [
+          'List winning patterns (hooks, structure, CTAs)',
+          'Document audience questions to address',
+          'Note gaps competitors missed',
+          'Identify unique angle opportunity',
+        ],
+      },
+      {
+        title: 'Write Script',
+        description: 'Create the full script using research insights.',
+        checklist: [
+          'Write 3 title options',
+          'Write word-for-word HOOK (0:00-0:45)',
+          'Write INTRO with credibility (0:45-2:00)',
+          'Write MAIN CONTENT with 3-5 sections (2:00-12:00)',
+          'Address audience questions from comments',
+          'Write OBJECTION HANDLING section (12:00-13:00)',
+          'Write CTA + OUTRO (13:00-15:00)',
+          'Add B-roll/visual notes',
+          'Add production notes',
+          'Create thumbnail concepts',
+        ],
+      },
+      {
+        title: 'Create HTML Preview',
+        description: 'Convert script to styled HTML for the Bob App.',
+        checklist: [
+          'Format script with sections and timestamps',
+          'Apply dark theme styling',
+          'Include all production notes',
+          'Save to bob-command-center/public/scripts/',
+        ],
+      },
+      {
+        title: 'Deploy to Bob App',
+        description: 'Publish the script live.',
+        checklist: [
+          'Run vercel deploy with token',
+          'Verify deployment successful',
+          'Test live URL',
+          'Update CHANGELOG.md',
+        ],
+      },
+      {
+        title: 'Deliver to Jay',
+        description: 'Send the live link and summary.',
+        checklist: [
+          'Send live URL via iMessage',
+          'Include brief summary of research insights',
+          'Note any standout findings',
+        ],
+      },
+    ],
+    expectedOutcomes: [
+      'Research on 10+ top videos from past 30 days',
+      'Transcripts analyzed for winning patterns',
+      'Comments analyzed for audience insights',
+      'Data-driven script with timestamps',
+      'Published to bob.nextwave.io',
+      'Live shareable link delivered',
+    ],
+    troubleshooting: [
+      {
+        issue: 'Apify rate limited or blocked',
+        solution: 'Wait 15 minutes and retry. Consider using proxy settings in Apify.',
+      },
+      {
+        issue: 'No transcripts available for videos',
+        solution: 'Some videos disable transcripts. Use available transcripts and note which videos had none.',
+      },
+      {
+        issue: 'Topic too niche with few videos',
+        solution: 'Expand time range to 60-90 days, or broaden the topic slightly.',
+      },
+      {
+        issue: 'Vercel deployment fails',
+        solution: 'Check build logs, verify token is valid, ensure no syntax errors in HTML.',
+      },
+    ],
+    flowchart: `
+┌─────────────────────────┐
+│  Jay Requests Script    │
+│  on [TOPIC]             │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  APIFY: Search YouTube  │
+│  Top 10-20 videos       │
+│  (Last 30 days)         │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  APIFY: Extract         │
+│  Transcripts            │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  APIFY: Extract         │
+│  Top Comments           │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Analyze:               │
+│  - Hooks & Structure    │
+│  - Audience Questions   │
+│  - Gaps & Opportunities │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Write Full Script      │
+│  with Timestamps        │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Create HTML Preview    │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Deploy to Bob App      │
+│  (Vercel)               │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Send Live Link to Jay  │
+└─────────────────────────┘
+`,
+  },
+  'sop-005': {
+    id: 'sop-005',
+    title: 'Travel Itinerary Management',
+    description: 'Create organized travel itineraries from email confirmations using TripIt',
+    category: 'Operations',
+    lastUpdated: '2026-01-30',
+    version: '1.0',
+    purpose: 'Transform scattered travel confirmation emails into a unified, accessible itinerary that syncs across all devices and provides real-time updates.',
+    scope: 'This SOP applies when Jay sends travel confirmation emails (flights, hotels, car rentals, etc.) to Bob. Bob processes them through TripIt and delivers a complete itinerary.',
+    prerequisites: [
+      'TripIt account set up',
+      'Access to travel confirmation emails',
+      'TripIt app installed on phone (recommended)',
+    ],
+    steps: [
+      {
+        title: 'Receive Travel Plans',
+        description: 'Jay sends or forwards travel confirmation emails to Bob.',
+        checklist: [
+          'Identify all travel components (flights, hotels, cars, etc.)',
+          'Note destinations and travel dates',
+          'Collect all confirmation numbers',
+          'Check for any booking references',
+        ],
+      },
+      {
+        title: 'Forward to TripIt',
+        description: 'Forward each confirmation email to plans@tripit.com for automatic parsing.',
+        checklist: [
+          'Forward each confirmation to plans@tripit.com',
+          'Keep original subject line intact',
+          'Keep original email content (TripIt parses it)',
+          'Wait 1-2 minutes for processing',
+        ],
+      },
+      {
+        title: 'Verify Parsing',
+        description: 'Check TripIt to confirm all details were captured correctly.',
+        checklist: [
+          'Log into TripIt (web or app)',
+          'Verify flight times and numbers are correct',
+          'Check hotel check-in/out times',
+          'Confirm all confirmation numbers appear',
+          'Ensure items grouped into correct trip',
+        ],
+      },
+      {
+        title: 'Organize Itinerary',
+        description: 'Name the trip and add any missing items.',
+        checklist: [
+          'Rename trip if needed (Destination - Purpose)',
+          'Add ground transportation not in emails',
+          'Add meeting locations/addresses',
+          'Add any manual reservations',
+          'Verify no gaps in transportation',
+        ],
+      },
+      {
+        title: 'Deliver to Jay',
+        description: 'Send the itinerary link with a summary.',
+        checklist: [
+          'Get shareable TripIt link',
+          'Send via iMessage with trip summary',
+          'Include key flight/hotel info',
+          'Add major events to Google Calendar if requested',
+        ],
+      },
+      {
+        title: 'Pre-Trip Monitoring',
+        description: 'Monitor for changes before and during travel.',
+        checklist: [
+          'TripIt Pro sends automatic alerts (if enabled)',
+          'Check flight status day-of travel',
+          'Alert Jay to any delays or gate changes',
+          'Provide terminal/gate info when available',
+        ],
+      },
+    ],
+    expectedOutcomes: [
+      'All travel confirmations consolidated in one itinerary',
+      'Accessible on phone, tablet, and computer',
+      'Real-time flight alerts (with TripIt Pro)',
+      'Easy sharing with travel companions',
+      'Offline access to all trip details',
+    ],
+    troubleshooting: [
+      {
+        issue: 'Email not parsed by TripIt',
+        solution: 'Forward again or add the item manually in TripIt. Some boutique hotels may not parse automatically.',
+      },
+      {
+        issue: 'Items grouped into wrong trip',
+        solution: 'Edit the trip in TripIt and move items to the correct trip.',
+      },
+      {
+        issue: 'Flight times showing incorrectly',
+        solution: 'Verify against airline website, then edit manually in TripIt if needed.',
+      },
+      {
+        issue: 'Missing confirmation number',
+        solution: 'Check original email and add confirmation number manually to the TripIt entry.',
+      },
+    ],
+    flowchart: `
+┌─────────────────────────┐
+│  Jay Sends Travel       │
+│  Confirmation Emails    │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Forward Each Email to  │
+│  plans@tripit.com       │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  TripIt Auto-Parses:    │
+│  Flights, Hotels, Cars  │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Verify in TripIt       │
+│  All details correct?   │
+└───────────┬─────────────┘
+       ┌────┴────┐
+       │         │
+      Yes        No
+       │         │
+       │         ▼
+       │    ┌─────────────┐
+       │    │ Edit/Add    │
+       │    │ Manually    │
+       │    └──────┬──────┘
+       │           │
+       └─────┬─────┘
+             │
+             ▼
+┌─────────────────────────┐
+│  Name Trip & Organize   │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Send Itinerary Link    │
+│  to Jay via iMessage    │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│  Monitor for Changes    │
+│  (Flights, Gates, etc)  │
+└─────────────────────────┘
+`,
+  },
 };
 
 export const sopList = Object.values(sopDatabase).map(sop => ({
