@@ -1,0 +1,38 @@
+[
+  {
+    "id": "reminder-8pm-calendar",
+    "text": "8pm Calendar Preview - Send tomorrow's schedule to Jay via iMessage",
+    "schedule": "0 20 * * * (daily at 8pm EST)",
+    "nextRun": null,
+    "enabled": true,
+    "cronJobId": "7fe4117d-167e-4ec5-9cda-e002ea037968",
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "reminder-5pm-review",
+    "text": "5pm Daily Review - Summarize Slack, Notion, Asana, Gmail items waiting on Jay (weekdays)",
+    "schedule": "0 17 * * 1-5 (Mon-Fri at 5pm EST)",
+    "nextRun": null,
+    "enabled": true,
+    "cronJobId": "09199abf-9d72-43a0-a40a-009bb02229d6",
+    "created_at": "2026-01-27T12:00:00.000Z"
+  },
+  {
+    "id": "reminder-9am-sales",
+    "text": "9am Sales Tracking Reminder - Remind Jay to fix sales tracking issue (marked urgent Jan 29)",
+    "schedule": "0 9 * * * (daily at 9am EST)",
+    "nextRun": null,
+    "enabled": true,
+    "cronJobId": "7c8efe20-e907-40d8-ad02-8b4104a25d17",
+    "created_at": "2026-01-29T12:00:00.000Z"
+  },
+  {
+    "id": "reminder-email-check",
+    "text": "Email Check - Monitor bob@leadgenjay.com for items needing Jay's attention",
+    "schedule": "*/10 * * * * (every 10 minutes)",
+    "nextRun": null,
+    "enabled": true,
+    "cronJobId": "78806355-205a-4f74-8766-f40c1ccd8611",
+    "created_at": "2026-01-26T12:00:00.000Z"
+  }
+]

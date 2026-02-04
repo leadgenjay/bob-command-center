@@ -303,6 +303,32 @@
     }
   }
 
+  .animate-slide-up-sheet {
+    animation: slide-up-sheet 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  @keyframes slide-up-sheet {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   .shimmer {
     background: linear-gradient(
       90deg,
@@ -334,17 +360,14 @@
 
   /* Kanban styles */
   .kanban-column {
-    @apply min-h-[400px] rounded-2xl p-4 transition-colors duration-200;
+    @apply min-h-[400px] rounded-2xl p-3 transition-colors duration-200;
   }
 
-  .kanban-card {
-    @apply bg-card rounded-xl p-4 shadow-sm border border-border;
-    @apply transition-all duration-200;
-    @apply active:scale-[0.98];
-  }
-
-  .kanban-card-dragging {
-    @apply shadow-2xl opacity-95 rotate-2 scale-105;
+  /* Desktop kanban improvements */
+  @media (min-width: 768px) {
+    .kanban-column {
+      @apply min-h-[500px] p-4;
+    }
   }
 
   /* Mobile horizontal scroll */

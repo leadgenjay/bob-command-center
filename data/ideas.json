@@ -1,0 +1,57 @@
+[
+  {
+    "id": "idea-1738252800001",
+    "title": "Split Credit System for Consulti",
+    "description": "Separate lead export credits from email verification credits so we can compete with Million Verify on email verification pricing. Technical: Add verification_credits_balance + export_credits_balance to profiles table.",
+    "category": "business",
+    "tags": ["consulti", "pricing", "product"],
+    "priority": "high",
+    "status": "developing",
+    "created_at": "2026-01-27T12:00:00.000Z",
+    "updated_at": "2026-01-27T12:00:00.000Z"
+  },
+  {
+    "id": "idea-1738252800002",
+    "title": "Codebase Access for AI Automation Insiders",
+    "description": "Give course members access to code for apps Jay is building. Recommended: GitHub Teams with automated onboarding via n8n.",
+    "category": "business",
+    "tags": ["insiders", "course", "github"],
+    "priority": "high",
+    "status": "developing",
+    "created_at": "2026-01-27T12:00:00.000Z",
+    "updated_at": "2026-01-27T12:00:00.000Z"
+  },
+  {
+    "id": "idea-1738252800003",
+    "title": "AI-powered lead qualification",
+    "description": "Use Bob to pre-qualify inbound leads based on criteria before scheduling calls",
+    "category": "business",
+    "tags": ["ai", "automation", "leads"],
+    "priority": "medium",
+    "status": "captured",
+    "created_at": "2026-01-26T12:00:00.000Z",
+    "updated_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "idea-1738252800004",
+    "title": "Voice memo to task extraction",
+    "description": "Send Bob a voice memo and have it extracted into actionable tasks",
+    "category": "apps",
+    "tags": ["ai", "productivity"],
+    "priority": "low",
+    "status": "captured",
+    "created_at": "2026-01-26T12:00:00.000Z",
+    "updated_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "idea-1738252800005",
+    "title": "Trip planning automation",
+    "description": "Bob researches destinations, suggests itineraries, finds deals",
+    "category": "apps",
+    "tags": ["travel", "automation"],
+    "priority": "low",
+    "status": "captured",
+    "created_at": "2026-01-30T12:00:00.000Z",
+    "updated_at": "2026-01-30T12:00:00.000Z"
+  }
+]

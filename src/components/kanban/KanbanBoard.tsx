@@ -16,7 +16,6 @@ import {
 } from '@dnd-kit/core';
 import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { Task, TaskStatus, TASK_STATUS_CONFIG } from '@/lib/types';
-import { getTasks, updateTask } from '@/lib/store';
 import { KanbanColumn } from './KanbanColumn';
 import { TaskCard } from './TaskCard';
 import { cn } from '@/lib/utils';
@@ -30,8 +29,18 @@ export function KanbanBoard() {
   const [activeColumnIndex, setActiveColumnIndex] = useState(1); // Start at "todo"
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch('/api/tasks');
+      const data = await res.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error);
+    }
+  };
+
   useEffect(() => {
-    setTasks(getTasks());
+    fetchTasks();
   }, []);
 
   const sensors = useSensors(
@@ -96,7 +105,7 @@ export function KanbanBoard() {
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
     if (!over) {
@@ -109,7 +118,16 @@ export function KanbanBoard() {
 
     const activeTask = tasks.find(t => t.id === activeId);
     if (activeTask) {
-      updateTask(activeId, { status: activeTask.status });
+      // Update task via API
+      try {
+        await fetch('/api/tasks', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: activeId, status: activeTask.status }),
+        });
+      } catch (error) {
+        console.error('Failed to update task:', error);
+      }
     }
 
     if (activeId !== overId && !COLUMNS.includes(overId as TaskStatus)) {
@@ -125,7 +143,7 @@ export function KanbanBoard() {
   };
 
   const refreshTasks = () => {
-    setTasks(getTasks());
+    fetchTasks();
   };
 
   const scrollToColumn = (index: number) => {

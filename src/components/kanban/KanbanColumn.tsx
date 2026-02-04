@@ -46,7 +46,7 @@ export function KanbanColumn({ status, tasks, config, onTaskUpdate }: KanbanColu
           {tasks.map((task, index) => (
             <div 
               key={task.id}
-              className="animate-scale-in"
+              className="animate-scale-in group"
               style={{ animationDelay: `${index * 30}ms` }}
             >
               <TaskCard task={task} onUpdate={onTaskUpdate} />

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Reminder } from '@/lib/types';
-import { getReminders, createReminder, updateReminder, deleteReminder } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,36 +14,66 @@ export default function RemindersPage() {
   const [newText, setNewText] = useState('');
   const [newSchedule, setNewSchedule] = useState('');
 
+  const fetchReminders = async () => {
+    try {
+      const res = await fetch('/api/reminders');
+      const data = await res.json();
+      setReminders(data);
+    } catch (error) {
+      console.error('Failed to fetch reminders:', error);
+    }
+  };
+
   useEffect(() => {
-    refreshReminders();
+    fetchReminders();
   }, []);
 
   const refreshReminders = () => {
-    setReminders(getReminders());
+    fetchReminders();
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!newText.trim()) return;
-    createReminder({
-      text: newText.trim(),
-      schedule: newSchedule.trim() || 'Manual',
-      nextRun: null,
-      enabled: true,
-    });
-    setNewText('');
-    setNewSchedule('');
-    setShowAddForm(false);
-    refreshReminders();
+    try {
+      await fetch('/api/reminders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: newText.trim(),
+          schedule: newSchedule.trim() || 'Manual',
+          nextRun: null,
+          enabled: true,
+        }),
+      });
+      setNewText('');
+      setNewSchedule('');
+      setShowAddForm(false);
+      refreshReminders();
+    } catch (error) {
+      console.error('Failed to add reminder:', error);
+    }
   };
 
-  const handleToggle = (id: string, enabled: boolean) => {
-    updateReminder(id, { enabled: !enabled });
-    refreshReminders();
+  const handleToggle = async (id: string, enabled: boolean) => {
+    try {
+      await fetch('/api/reminders', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, enabled: !enabled }),
+      });
+      refreshReminders();
+    } catch (error) {
+      console.error('Failed to toggle reminder:', error);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteReminder(id);
-    refreshReminders();
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch(`/api/reminders?id=${id}`, { method: 'DELETE' });
+      refreshReminders();
+    } catch (error) {
+      console.error('Failed to delete reminder:', error);
+    }
   };
 
   const enabledReminders = reminders.filter(r => r.enabled);

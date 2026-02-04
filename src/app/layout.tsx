@@ -58,7 +58,7 @@ export default function RootLayout({
         <Navigation />
         
         {/* Main content with safe areas */}
-        <main className="pt-safe pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
+        <main className="pt-safe pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen">
           <div className="pt-16 md:pt-20">
             {children}
           </div>

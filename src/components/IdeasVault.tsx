@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Idea, IdeaCategory, IDEA_CATEGORY_CONFIG, PRIORITY_CONFIG, IdeaStatus } from '@/lib/types';
-import { getIdeas, updateIdea, deleteIdea } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -22,27 +21,49 @@ export function IdeasVault() {
   const [activeCategory, setActiveCategory] = useState<IdeaCategory | 'all'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
+  const fetchIdeas = async () => {
+    try {
+      const res = await fetch('/api/ideas');
+      const data = await res.json();
+      setIdeas(data);
+    } catch (error) {
+      console.error('Failed to fetch ideas:', error);
+    }
+  };
+
   useEffect(() => {
-    refreshIdeas();
+    fetchIdeas();
   }, []);
 
   const refreshIdeas = () => {
-    setIdeas(getIdeas());
+    fetchIdeas();
   };
 
   const filteredIdeas = activeCategory === 'all'
     ? ideas
     : ideas.filter(idea => idea.category === activeCategory);
 
-  const handleDeleteIdea = (e: React.MouseEvent, id: string) => {
+  const handleDeleteIdea = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    deleteIdea(id);
-    refreshIdeas();
+    try {
+      await fetch(`/api/ideas?id=${id}`, { method: 'DELETE' });
+      refreshIdeas();
+    } catch (error) {
+      console.error('Failed to delete idea:', error);
+    }
   };
 
-  const handleStatusChange = (id: string, status: IdeaStatus) => {
-    updateIdea(id, { status });
-    refreshIdeas();
+  const handleStatusChange = async (id: string, status: IdeaStatus) => {
+    try {
+      await fetch('/api/ideas', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+      });
+      refreshIdeas();
+    } catch (error) {
+      console.error('Failed to update idea:', error);
+    }
   };
 
   const toggleExpand = (id: string) => {

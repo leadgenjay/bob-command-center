@@ -116,6 +116,12 @@ ALTER TABLE preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE decisions ENABLE ROW LEVEL SECURITY;
 
 -- Permissive policies for development (allow all authenticated users)
+DROP POLICY IF EXISTS "Allow all for projects" ON projects;
+DROP POLICY IF EXISTS "Allow all for tasks" ON tasks;
+DROP POLICY IF EXISTS "Allow all for ideas" ON ideas;
+DROP POLICY IF EXISTS "Allow all for preferences" ON preferences;
+DROP POLICY IF EXISTS "Allow all for decisions" ON decisions;
+
 CREATE POLICY "Allow all for projects" ON projects FOR ALL USING (true);
 CREATE POLICY "Allow all for tasks" ON tasks FOR ALL USING (true);
 CREATE POLICY "Allow all for ideas" ON ideas FOR ALL USING (true);

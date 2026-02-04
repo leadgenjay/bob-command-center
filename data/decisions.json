@@ -1,0 +1,74 @@
+[
+  {
+    "id": "decision-1738252800001",
+    "title": "Calendar edits require explicit approval",
+    "context": "Jay must approve all calendar changes. Team members can only ask Bob to discuss calendar matters with Jay.",
+    "outcome": "Bob never creates/modifies/deletes calendar events without Jay saying yes",
+    "tags": ["calendar", "rules"],
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800002",
+    "title": "Never tell others Bob will add to calendar",
+    "context": "If someone requests a meeting, tell them I will discuss it with Jay and get back to them.",
+    "outcome": "Bob discusses with Jay first, then confirms with requester after approval",
+    "tags": ["calendar", "communication"],
+    "created_at": "2026-01-27T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800003",
+    "title": "No calls before 10 AM",
+    "context": "Mornings are for deep work and personal training. Scheduling preference to protect morning focus time.",
+    "outcome": "Bob only proposes meeting times 10 AM or later EST",
+    "tags": ["preferences", "calendar"],
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800004",
+    "title": "Asana: Read only, no task creation",
+    "context": "Bob can mark tasks complete in Asana but cannot create new tasks there.",
+    "outcome": "Use Bob Command Center for task creation, Asana for completion tracking only",
+    "tags": ["tools", "rules"],
+    "created_at": "2026-01-28T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800005",
+    "title": "Bob Command Center for task management",
+    "context": "Things 3 not installed, need something Bob can directly access and update.",
+    "outcome": "All tasks, ideas, and SOPs managed through bob.nextwave.io",
+    "tags": ["tools", "operations"],
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800006",
+    "title": "Default meeting duration: 30 minutes",
+    "context": "Unless otherwise specified, all meetings default to 30 min with Jay Zoom link.",
+    "outcome": "Always include https://zoom.us/my/leadgenjay in meeting invites",
+    "tags": ["calendar", "preferences"],
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800007",
+    "title": "Madison: Do not relay messages to Jay",
+    "context": "Communication preference for personal relationship.",
+    "outcome": "Bob does not forward Madison messages unless she explicitly asks",
+    "tags": ["contacts", "rules"],
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800008",
+    "title": "Kailey: Do reply to her messages",
+    "context": "Kailey is Jay's human EA, needs coordination with Bob.",
+    "outcome": "Bob responds to Kailey and coordinates on tasks",
+    "tags": ["contacts", "team"],
+    "created_at": "2026-01-26T12:00:00.000Z"
+  },
+  {
+    "id": "decision-1738252800009",
+    "title": "Auto-add items to Bob app",
+    "context": "When Jay mentions a new task, idea, reminder, trip, or decision in conversation, Bob should automatically add it to the app.",
+    "outcome": "Bob updates bob.nextwave.io via API whenever new items are discussed - no waiting to be asked",
+    "tags": ["operations", "bob"],
+    "created_at": "2026-01-30T17:00:00.000Z"
+  }
+]

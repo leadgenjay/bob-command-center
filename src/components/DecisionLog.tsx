@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Decision } from '@/lib/types';
-import { getDecisions, createDecision, deleteDecision } from '@/lib/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,30 +30,52 @@ export function DecisionLog() {
     tags: '',
   });
 
+  const fetchDecisions = async () => {
+    try {
+      const res = await fetch('/api/decisions');
+      const data = await res.json();
+      setDecisions(data);
+    } catch (error) {
+      console.error('Failed to fetch decisions:', error);
+    }
+  };
+
   useEffect(() => {
-    refreshDecisions();
+    fetchDecisions();
   }, []);
 
   const refreshDecisions = () => {
-    setDecisions(getDecisions());
+    fetchDecisions();
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!newDecision.title.trim()) return;
-    createDecision({
-      title: newDecision.title,
-      context: newDecision.context || null,
-      outcome: newDecision.outcome || null,
-      tags: newDecision.tags.split(',').map(t => t.trim()).filter(Boolean),
-    });
-    setNewDecision({ title: '', context: '', outcome: '', tags: '' });
-    setIsDialogOpen(false);
-    refreshDecisions();
+    try {
+      await fetch('/api/decisions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newDecision.title,
+          context: newDecision.context || null,
+          outcome: newDecision.outcome || null,
+          tags: newDecision.tags.split(',').map(t => t.trim()).filter(Boolean),
+        }),
+      });
+      setNewDecision({ title: '', context: '', outcome: '', tags: '' });
+      setIsDialogOpen(false);
+      refreshDecisions();
+    } catch (error) {
+      console.error('Failed to create decision:', error);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteDecision(id);
-    refreshDecisions();
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch(`/api/decisions?id=${id}`, { method: 'DELETE' });
+      refreshDecisions();
+    } catch (error) {
+      console.error('Failed to delete decision:', error);
+    }
   };
 
   return (

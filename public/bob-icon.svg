@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#ED0D51"/>
+  
+  <!-- Robot head -->
+  <rect x="136" y="140" width="240" height="220" rx="30" fill="#FFFFFF"/>
+  
+  <!-- Eyes -->
+  <circle cx="196" cy="220" r="28" fill="#ED0D51"/>
+  <circle cx="316" cy="220" r="28" fill="#ED0D51"/>
+  
+  <!-- Eye shine -->
+  <circle cx="188" cy="212" r="8" fill="#FFFFFF"/>
+  <circle cx="308" cy="212" r="8" fill="#FFFFFF"/>
+  
+  <!-- Mouth/smile -->
+  <rect x="186" y="290" width="140" height="20" rx="10" fill="#ED0D51"/>
+  
+  <!-- Antenna -->
+  <rect x="246" y="90" width="20" height="50" fill="#FFFFFF"/>
+  <circle cx="256" cy="80" r="20" fill="#FFFFFF"/>
+  <circle cx="256" cy="80" r="10" fill="#ED0D51"/>
+  
+  <!-- Ear bolts -->
+  <circle cx="136" cy="220" r="15" fill="#FFFFFF"/>
+  <circle cx="376" cy="220" r="15" fill="#FFFFFF"/>
+</svg>

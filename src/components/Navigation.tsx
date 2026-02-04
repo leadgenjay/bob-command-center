@@ -17,14 +17,16 @@ import {
   Sun,
   Files,
   Plane,
+  Video,
 } from 'lucide-react';
 
 const navItems = [
-  { href: '/kanban', label: 'Tasks', icon: Kanban },
+  { href: '/tasks', label: 'Tasks', icon: Kanban },
   { href: '/daily', label: 'Daily', icon: Sun },
   { href: '/trips', label: 'Trips', icon: Plane },
-  { href: '/reminders', label: 'Reminders', icon: Bell },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
+  { href: '/reminders', label: 'Reminders', icon: Bell },
+  { href: '/content', label: 'Content', icon: Video },
   { href: '/documents', label: 'Docs', icon: Files },
   { href: '/sops', label: 'SOPs', icon: FileText },
 ];
@@ -40,9 +42,11 @@ export function Navigation() {
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 group-active:scale-95">
-                <span className="text-white font-bold text-sm">Bob</span>
-              </div>
+              <img 
+                src="/bob-icon.png" 
+                alt="Bob" 
+                className="h-9 w-9 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-200 group-active:scale-95 object-cover"
+              />
               <span className="font-bold text-base sm:text-lg hidden sm:block">
                 Command Center
               </span>
@@ -101,7 +105,7 @@ export function Navigation() {
             <div className="frosted-glass-strong rounded-2xl shadow-2xl overflow-hidden border border-border">
               <div className="p-2">
                 <Link
-                  href="/kanban?add=task"
+                  href="/tasks?add=task"
                   onClick={() => setShowAddMenu(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors"
                 >
