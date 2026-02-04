@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ActivityFeed } from '@/components/ActivityFeed';
+import { QuickAddFab } from '@/components/QuickAddFab';
 
 interface QuickStats {
   tasksInProgress: number;
@@ -238,6 +239,9 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Quick Add FAB */}
+      <QuickAddFab />
     </div>
   );
 }
