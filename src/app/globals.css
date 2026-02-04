@@ -329,6 +329,35 @@
     }
   }
 
+  .animate-gradient {
+    animation: gradient-shift 8s ease infinite;
+    background-size: 200% 200%;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .stat-card {
+    @apply transition-all duration-300;
+  }
+
+  .stat-card:hover {
+    @apply shadow-lg -translate-y-0.5;
+  }
+
+  .stat-card:active {
+    @apply scale-[0.98];
+  }
+
   .shimmer {
     background: linear-gradient(
       90deg,

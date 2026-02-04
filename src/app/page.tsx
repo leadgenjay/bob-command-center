@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { ActivityFeed } from '@/components/ActivityFeed';
 
 interface QuickStats {
   tasksInProgress: number;
@@ -123,7 +124,7 @@ export default function Dashboard() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="frosted-glass rounded-2xl p-4">
+        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="h-4 w-4 text-amber-500" />
             <span className="text-xs text-muted-foreground">In Progress</span>
@@ -132,7 +133,7 @@ export default function Dashboard() {
           <p className="text-xs text-muted-foreground">tasks</p>
         </div>
         
-        <div className="frosted-glass rounded-2xl p-4">
+        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
           <div className="flex items-center gap-2 mb-2">
             <Calendar className="h-4 w-4 text-blue-500" />
             <span className="text-xs text-muted-foreground">Due Today</span>
@@ -141,7 +142,7 @@ export default function Dashboard() {
           <p className="text-xs text-muted-foreground">tasks</p>
         </div>
         
-        <div className="frosted-glass rounded-2xl p-4">
+        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
           <div className="flex items-center gap-2 mb-2">
             <Plane className="h-4 w-4 text-indigo-500" />
             <span className="text-xs text-muted-foreground">Upcoming</span>
@@ -150,7 +151,7 @@ export default function Dashboard() {
           <p className="text-xs text-muted-foreground">trips</p>
         </div>
         
-        <div className="frosted-glass rounded-2xl p-4">
+        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
           <div className="flex items-center gap-2 mb-2">
             <Bell className="h-4 w-4 text-pink-500" />
             <span className="text-xs text-muted-foreground">Active</span>
@@ -159,6 +160,9 @@ export default function Dashboard() {
           <p className="text-xs text-muted-foreground">reminders</p>
         </div>
       </div>
+
+      {/* Activity Feed */}
+      <ActivityFeed />
 
       {/* Quick Access Cards */}
       <div>
