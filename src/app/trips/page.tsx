@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Plane, 
@@ -12,6 +13,7 @@ import {
   Plus,
   ExternalLink
 } from 'lucide-react';
+import { AddTripSheet } from '@/components/AddTripSheet';
 
 interface Trip {
   id: string;
@@ -62,9 +64,20 @@ function formatDateRange(start: string, end: string): string {
   return `${startDate.toLocaleDateString('en-US', options)} – ${endDate.getDate()}, ${endDate.getFullYear()}`;
 }
 
-export default function TripsPage() {
+function TripsPageContent() {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddSheet, setShowAddSheet] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Handle ?add=true query param
+  useEffect(() => {
+    if (searchParams.get('add') === 'true') {
+      setShowAddSheet(true);
+      // Clean up URL
+      window.history.replaceState({}, '', '/trips');
+    }
+  }, [searchParams]);
 
   const fetchTrips = async () => {
     setLoading(true);
@@ -100,6 +113,13 @@ export default function TripsPage() {
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
+          </button>
+          <button
+            onClick={() => setShowAddSheet(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:shadow-lg transition-all active:scale-95"
+          >
+            <Plus className="h-4 w-4" />
+            Add Trip
           </button>
         </div>
       </div>
@@ -239,6 +259,21 @@ export default function TripsPage() {
           </div>
         </div>
       </div>
+
+      {/* Add Trip Sheet */}
+      <AddTripSheet
+        isOpen={showAddSheet}
+        onClose={() => setShowAddSheet(false)}
+        onTripAdded={fetchTrips}
+      />
     </div>
+  );
+}
+
+export default function TripsPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-6">Loading...</div>}>
+      <TripsPageContent />
+    </Suspense>
   );
 }

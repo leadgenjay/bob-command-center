@@ -1,18 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Reminder } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { Bell, Plus, Trash2, Clock, ToggleLeft, ToggleRight, X } from 'lucide-react';
+import { AddReminderSheet } from '@/components/AddReminderSheet';
 
-export default function RemindersPage() {
+function RemindersPageContent() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddSheet, setShowAddSheet] = useState(false);
   const [newText, setNewText] = useState('');
   const [newSchedule, setNewSchedule] = useState('');
+  const searchParams = useSearchParams();
+  
+  // Handle ?add=true query param
+  useEffect(() => {
+    if (searchParams.get('add') === 'true') {
+      setShowAddSheet(true);
+      // Clean up URL
+      window.history.replaceState({}, '', '/reminders');
+    }
+  }, [searchParams]);
 
   const fetchReminders = async () => {
     try {
@@ -230,6 +243,21 @@ export default function RemindersPage() {
           </p>
         </CardContent>
       </Card>
+
+      {/* Add Reminder Sheet */}
+      <AddReminderSheet
+        isOpen={showAddSheet}
+        onClose={() => setShowAddSheet(false)}
+        onReminderAdded={fetchReminders}
+      />
     </div>
+  );
+}
+
+export default function RemindersPage() {
+  return (
+    <Suspense fallback={<div className="animate-pulse p-6">Loading...</div>}>
+      <RemindersPageContent />
+    </Suspense>
   );
 }
