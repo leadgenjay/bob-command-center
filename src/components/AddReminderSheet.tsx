@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Bell, Clock, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/toast';
 
 interface AddReminderSheetProps {
   isOpen: boolean;

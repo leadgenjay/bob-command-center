@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Plane, MapPin, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/toast';
 import { format, addDays } from 'date-fns';
 
 interface AddTripSheetProps {

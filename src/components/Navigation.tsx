@@ -18,11 +18,13 @@ import {
   Files,
   Plane,
   Video,
+  Users,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/tasks', label: 'Tasks', icon: Kanban },
   { href: '/daily', label: 'Daily', icon: Sun },
+  { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/trips', label: 'Trips', icon: Plane },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
   { href: '/reminders', label: 'Reminders', icon: Bell },

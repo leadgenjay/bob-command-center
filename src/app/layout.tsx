@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import { BottomNav } from "@/components/BottomNav";
+import { ToastProvider } from "@/components/ui/toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -54,18 +55,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* Desktop top navigation */}
-        <Navigation />
-        
-        {/* Main content with safe areas */}
-        <main className="pt-safe pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen">
-          <div className="pt-16 md:pt-20">
-            {children}
-          </div>
-        </main>
-        
-        {/* Mobile bottom navigation */}
-        <BottomNav />
+        <ToastProvider>
+          {/* Desktop top navigation */}
+          <Navigation />
+          
+          {/* Main content with safe areas */}
+          <main className="pt-safe pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen">
+            <div className="pt-16 md:pt-20">
+              {children}
+            </div>
+          </main>
+          
+          {/* Mobile bottom navigation */}
+          <BottomNav />
+        </ToastProvider>
       </body>
     </html>
   );

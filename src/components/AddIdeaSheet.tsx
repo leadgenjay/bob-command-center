@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Lightbulb, Flag, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/components/ui/toast';
 import { IdeaCategory, TaskPriority, IDEA_CATEGORY_CONFIG, PRIORITY_CONFIG } from '@/lib/types';
 
 interface AddIdeaSheetProps {

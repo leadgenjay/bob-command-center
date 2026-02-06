@@ -12,6 +12,7 @@ import {
   Settings,
   X,
   ChevronRight,
+  Users,
 } from 'lucide-react';
 
 interface MoreMenuProps {
@@ -20,6 +21,7 @@ interface MoreMenuProps {
 }
 
 const menuItems = [
+  { href: '/contacts', label: 'Contacts', icon: Users, description: 'Personal CRM' },
   { href: '/reminders', label: 'Reminders', icon: Bell, description: 'Scheduled notifications' },
   { href: '/decisions', label: 'Decisions', icon: Scale, description: 'Decision log' },
   { href: '/content', label: 'Content', icon: Video, description: 'Content pipeline' },

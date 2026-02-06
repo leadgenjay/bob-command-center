@@ -5,6 +5,7 @@ import { X, Plus, Calendar, Flag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TaskStatus, TaskPriority, TASK_STATUS_CONFIG, PRIORITY_CONFIG } from '@/lib/types';
 import { format } from 'date-fns';
+import { useToast } from '@/components/ui/toast';
 
 interface AddTaskSheetProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function AddTaskSheet({ isOpen, onClose, onTaskAdded }: AddTaskSheetProps
   const [priority, setPriority] = useState<TaskPriority>('medium');
   const [dueDate, setDueDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { addToast } = useToast();
 
   // Reset form when opened
   useEffect(() => {
@@ -65,11 +67,15 @@ export function AddTaskSheet({ isOpen, onClose, onTaskAdded }: AddTaskSheetProps
       });
 
       if (response.ok) {
+        addToast('Task created successfully!', 'success');
         onTaskAdded?.();
         onClose();
+      } else {
+        addToast('Failed to create task', 'error');
       }
     } catch (error) {
       console.error('Failed to create task:', error);
+      addToast('Failed to create task', 'error');
     } finally {
       setIsSubmitting(false);
     }
