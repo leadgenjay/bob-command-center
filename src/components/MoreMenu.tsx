@@ -13,6 +13,7 @@ import {
   X,
   ChevronRight,
   Users,
+  Terminal,
 } from 'lucide-react';
 
 interface MoreMenuProps {
@@ -23,6 +24,7 @@ interface MoreMenuProps {
 const menuItems = [
   { href: '/contacts', label: 'Contacts', icon: Users, description: 'Personal CRM' },
   { href: '/reminders', label: 'Reminders', icon: Bell, description: 'Scheduled notifications' },
+  { href: '/commands', label: 'Commands', icon: Terminal, description: 'Bot slash commands' },
   { href: '/decisions', label: 'Decisions', icon: Scale, description: 'Decision log' },
   { href: '/content', label: 'Content', icon: Video, description: 'Content pipeline' },
   { href: '/documents', label: 'Documents', icon: Files, description: 'Document library' },

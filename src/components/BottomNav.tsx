@@ -27,7 +27,7 @@ export function BottomNav() {
   const [showMore, setShowMore] = useState(false);
 
   // Paths that aren't in the main nav (show as "More" being active)
-  const morePaths = ['/contacts', '/decisions', '/preferences', '/projects', '/reminders', '/documents', '/sops', '/content'];
+  const morePaths = ['/contacts', '/decisions', '/preferences', '/projects', '/reminders', '/documents', '/sops', '/content', '/commands'];
   const isMorePath = morePaths.some(p => pathname.startsWith(p));
 
   return (

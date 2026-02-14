@@ -1,7 +1,7 @@
 'use client';
 
 import { v4 as uuidv4 } from 'uuid';
-import { Task, Idea, Project, Preference, Decision, DailyTask, Reminder, TaskStatus, TaskPriority, IdeaCategory, IdeaStatus, ProjectStatus } from './types';
+import { Task, Idea, Project, Preference, Decision, DailyTask, Reminder, Command, TaskStatus, TaskPriority, IdeaCategory, IdeaStatus, ProjectStatus, CommandCategory } from './types';
 
 const STORAGE_KEYS = {
   tasks: 'bcc_tasks',
@@ -11,6 +11,7 @@ const STORAGE_KEYS = {
   decisions: 'bcc_decisions',
   dailyTasks: 'bcc_daily_tasks',
   reminders: 'bcc_reminders',
+  commands: 'bcc_commands',
   dataVersion: 'bcc_data_version',
 };
 
@@ -305,6 +306,53 @@ export function setReminders(reminders: Reminder[]): void {
   saveToStorage(STORAGE_KEYS.reminders, reminders);
 }
 
+// Commands
+export function getCommands(): Command[] {
+  return getFromStorage<Command>(STORAGE_KEYS.commands);
+}
+
+export function createCommand(command: Omit<Command, 'id' | 'created_at' | 'updated_at'>): Command {
+  const commands = getCommands();
+  const newCommand: Command = {
+    ...command,
+    id: uuidv4(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+  commands.push(newCommand);
+  saveToStorage(STORAGE_KEYS.commands, commands);
+  return newCommand;
+}
+
+export function updateCommand(id: string, updates: Partial<Command>): Command | null {
+  const commands = getCommands();
+  const index = commands.findIndex(c => c.id === id);
+  if (index === -1) return null;
+  commands[index] = { ...commands[index], ...updates, updated_at: new Date().toISOString() };
+  saveToStorage(STORAGE_KEYS.commands, commands);
+  return commands[index];
+}
+
+export function deleteCommand(id: string): boolean {
+  const commands = getCommands();
+  const filtered = commands.filter(c => c.id !== id);
+  if (filtered.length === commands.length) return false;
+  saveToStorage(STORAGE_KEYS.commands, filtered);
+  return true;
+}
+
+export function getCommandByName(name: string): Command | undefined {
+  return getCommands().find(c => c.name.toLowerCase() === name.toLowerCase());
+}
+
+export function getCommandsByCategory(category: CommandCategory): Command[] {
+  return getCommands().filter(c => c.category === category);
+}
+
+export function setCommands(commands: Command[]): void {
+  saveToStorage(STORAGE_KEYS.commands, commands);
+}
+
 // Initialize with sample data if empty
 export function initializeSampleData(): void {
   if (typeof window === 'undefined') return;
@@ -394,5 +442,19 @@ export function initializeSampleData(): void {
       { title: 'Kailey: Do reply to her messages', context: 'Kailey is Jay human EA, needs coordination with Bob.', outcome: 'Bob responds to Kailey and coordinates on tasks', tags: ['contacts', 'team'] },
     ];
     sampleDecisions.forEach(createDecision);
+  }
+
+  if (getCommands().length === 0) {
+    const sampleCommands: Omit<Command, 'id' | 'created_at' | 'updated_at'>[] = [
+      { 
+        name: 'kb', 
+        description: 'Add entry to team knowledge base and Notion LGJ Updates database',
+        syntax: '/kb [Department] Title | Description',
+        example: '/kb [Sales] New Apollo Rules | Apollo links now auto-expire after 30 days. Always check expiration before sending to clients.',
+        category: 'knowledge',
+        enabled: true
+      },
+    ];
+    sampleCommands.forEach(createCommand);
   }
 }

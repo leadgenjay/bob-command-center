@@ -19,6 +19,7 @@ import {
   Plane,
   Video,
   Users,
+  Terminal,
 } from 'lucide-react';
 
 const navItems = [
@@ -28,6 +29,7 @@ const navItems = [
   { href: '/trips', label: 'Trips', icon: Plane },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
   { href: '/reminders', label: 'Reminders', icon: Bell },
+  { href: '/commands', label: 'Commands', icon: Terminal },
   { href: '/content', label: 'Content', icon: Video },
   { href: '/documents', label: 'Docs', icon: Files },
   { href: '/sops', label: 'SOPs', icon: FileText },

@@ -1,4 +1,5 @@
 export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done';
+export type CommandCategory = 'general' | 'knowledge' | 'tasks' | 'reminders' | 'utilities';
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type IdeaCategory = 'content' | 'apps' | 'business' | 'social';
 export type IdeaStatus = 'captured' | 'developing' | 'ready' | 'archived';
@@ -74,6 +75,18 @@ export interface Decision {
   created_at: string;
 }
 
+export interface Command {
+  id: string;
+  name: string;           // e.g., 'kb', 'task', 'remind'
+  description: string;    // What the command does
+  syntax: string;         // How to use it
+  example: string | null; // Example usage
+  category: CommandCategory;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export const TASK_STATUS_CONFIG: Record<TaskStatus, { label: string; emoji: string; color: string; bgColor: string }> = {
   backlog: { label: 'Backlog', emoji: '📋', color: 'text-gray-500 dark:text-gray-400', bgColor: 'bg-gray-500/10' },
   todo: { label: 'To Do', emoji: '📌', color: 'text-blue-500 dark:text-blue-400', bgColor: 'bg-blue-500/10' },
@@ -100,3 +113,11 @@ export const PROJECT_COLORS = [
   '#ED0D51', '#8B5CF6', '#10B981', '#F59E0B', '#3B82F6', 
   '#EC4899', '#14B8A6', '#F97316', '#6366F1', '#84CC16'
 ];
+
+export const COMMAND_CATEGORY_CONFIG: Record<CommandCategory, { label: string; color: string; emoji: string }> = {
+  general: { label: 'General', color: 'bg-gray-500', emoji: '⚡' },
+  knowledge: { label: 'Knowledge', color: 'bg-blue-500', emoji: '📚' },
+  tasks: { label: 'Tasks', color: 'bg-emerald-500', emoji: '✅' },
+  reminders: { label: 'Reminders', color: 'bg-amber-500', emoji: '⏰' },
+  utilities: { label: 'Utilities', color: 'bg-purple-500', emoji: '🔧' },
+};
