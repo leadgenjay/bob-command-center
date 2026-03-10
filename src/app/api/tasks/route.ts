@@ -58,8 +58,7 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabase();
     const body = await request.json();
     
-    const newTask = {
-      id: `task-${Date.now()}`,
+    const newTask: Record<string, unknown> = {
       title: body.title || 'Untitled Task',
       description: body.description || null,
       status: body.status || 'todo',
