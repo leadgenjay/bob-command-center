@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Task, PRIORITY_CONFIG, TaskStatus } from '@/lib/types';
+import { Task, PRIORITY_CONFIG, TaskStatus, TASK_STATUS_CONFIG } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Clock, Calendar, MoreHorizontal, Trash2, Edit, GripVertical, Check, X, Square, CheckSquare } from 'lucide-react';
+import { Clock, Calendar, MoreHorizontal, Trash2, Edit, GripVertical, Check, X, Square, CheckSquare, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   DropdownMenu,
@@ -13,6 +13,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -95,10 +98,26 @@ export function TaskCard({ task, isDragging, onUpdate }: TaskCardProps) {
     setIsEditing(false);
   };
 
+  const handleMoveToStatus = async (e: React.MouseEvent, newStatus: TaskStatus) => {
+    e.stopPropagation();
+    try {
+      await fetch('/api/tasks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: task.id, status: newStatus }),
+      });
+      onUpdate?.();
+    } catch (error) {
+      console.error('Failed to move task:', error);
+    }
+  };
+
   const handleStartEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(true);
   };
+
+  const STATUSES: TaskStatus[] = ['backlog', 'todo', 'in_progress', 'review', 'done'];
 
   // Edit mode
   if (isEditing) {
@@ -204,6 +223,20 @@ export function TaskCard({ task, isDragging, onUpdate }: TaskCardProps) {
                   <Edit className="h-4 w-4 mr-2" />
                   Edit
                 </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    Move to
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {STATUSES.filter(s => s !== task.status).map(s => (
+                      <DropdownMenuItem key={s} onClick={(e) => handleMoveToStatus(e, s)}>
+                        <span className="mr-2">{TASK_STATUS_CONFIG[s].emoji}</span>
+                        {TASK_STATUS_CONFIG[s].label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 <DropdownMenuItem onClick={handleToggleComplete}>
                   {isDone ? (
                     <>
