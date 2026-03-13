@@ -7,7 +7,7 @@ import {
   Home,
   Kanban,
   Lightbulb,
-  Sun,
+  Clock,
   Plane,
   MoreHorizontal,
 } from 'lucide-react';
@@ -17,7 +17,7 @@ import { MoreMenu } from './MoreMenu';
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
   { href: '/tasks', label: 'Tasks', icon: Kanban },
-  { href: '/daily', label: 'Daily', icon: Sun },
+  { href: '/cron-jobs', label: 'Cron Jobs', icon: Clock },
   { href: '/trips', label: 'Trips', icon: Plane },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
 ];
@@ -27,7 +27,7 @@ export function BottomNav() {
   const [showMore, setShowMore] = useState(false);
 
   // Paths that aren't in the main nav (show as "More" being active)
-  const morePaths = ['/contacts', '/decisions', '/preferences', '/projects', '/reminders', '/documents', '/sops', '/content', '/commands'];
+  const morePaths = ['/contacts', '/decisions', '/preferences', '/projects', '/skills', '/sops', '/content', '/commands'];
   const isMorePath = morePaths.some(p => pathname.startsWith(p));
 
   return (
@@ -41,8 +41,8 @@ export function BottomNav() {
             const Icon = item.icon;
             const isActive = item.href === '/' 
               ? pathname === '/'
-              : item.href === '/trips'
-              ? pathname.startsWith('/trips')
+              : item.href === '/trips' || item.href === '/cron-jobs'
+              ? pathname.startsWith(item.href)
               : pathname === item.href;
             
             return (

@@ -13,8 +13,7 @@ import {
   Plus,
   CheckSquare,
   X,
-  Bell,
-  Sun,
+  Clock,
   Files,
   Plane,
   Video,
@@ -24,14 +23,13 @@ import {
 
 const navItems = [
   { href: '/tasks', label: 'Tasks', icon: Kanban },
-  { href: '/daily', label: 'Daily', icon: Sun },
+  { href: '/cron-jobs', label: 'Cron Jobs', icon: Clock },
   { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/trips', label: 'Trips', icon: Plane },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
-  { href: '/reminders', label: 'Reminders', icon: Bell },
   { href: '/commands', label: 'Commands', icon: Terminal },
   { href: '/content', label: 'Content', icon: Video },
-  { href: '/documents', label: 'Docs', icon: Files },
+  { href: '/skills', label: 'Skills', icon: Files },
   { href: '/sops', label: 'SOPs', icon: FileText },
 ];
 
