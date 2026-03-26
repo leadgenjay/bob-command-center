@@ -19,6 +19,7 @@ import {
   Video,
   Users,
   Terminal,
+  BookOpen,
 } from 'lucide-react';
 
 const navItems = [
@@ -29,6 +30,7 @@ const navItems = [
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
   { href: '/commands', label: 'Commands', icon: Terminal },
   { href: '/content', label: 'Content', icon: Video },
+  { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/skills', label: 'Skills', icon: Files },
   { href: '/sops', label: 'SOPs', icon: FileText },
 ];
