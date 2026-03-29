@@ -22,7 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ActivityFeed } from '@/components/ActivityFeed';
-import { QuickAddFab } from '@/components/QuickAddFab';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface QuickStats {
   tasksInProgress: number;
@@ -55,6 +55,7 @@ export default function Dashboard() {
     activeReminders: 0,
     ideasCount: 0,
   });
+  const [statsLoading, setStatsLoading] = useState(true);
   const [greeting, setGreeting] = useState('');
 
   useEffect(() => {
@@ -96,6 +97,8 @@ export default function Dashboard() {
       });
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -124,43 +127,58 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="h-4 w-4 text-amber-500" />
-            <span className="text-xs text-muted-foreground">In Progress</span>
-          </div>
-          <p className="text-2xl font-bold">{stats.tasksInProgress}</p>
-          <p className="text-xs text-muted-foreground">tasks</p>
+      {statsLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="frosted-glass rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+              <Skeleton className="h-8 w-12 mb-1" />
+              <Skeleton className="h-3 w-10" />
+            </div>
+          ))}
         </div>
-        
-        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
-          <div className="flex items-center gap-2 mb-2">
-            <Calendar className="h-4 w-4 text-blue-500" />
-            <span className="text-xs text-muted-foreground">Due Today</span>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+              <span className="text-xs text-muted-foreground">In Progress</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.tasksInProgress}</p>
+            <p className="text-xs text-muted-foreground">tasks</p>
           </div>
-          <p className="text-2xl font-bold">{stats.tasksDueToday}</p>
-          <p className="text-xs text-muted-foreground">tasks</p>
-        </div>
-        
-        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
-          <div className="flex items-center gap-2 mb-2">
-            <Plane className="h-4 w-4 text-indigo-500" />
-            <span className="text-xs text-muted-foreground">Upcoming</span>
+
+          <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="h-4 w-4 text-blue-500" />
+              <span className="text-xs text-muted-foreground">Due Today</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.tasksDueToday}</p>
+            <p className="text-xs text-muted-foreground">tasks</p>
           </div>
-          <p className="text-2xl font-bold">{stats.upcomingTrips}</p>
-          <p className="text-xs text-muted-foreground">trips</p>
-        </div>
-        
-        <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
-          <div className="flex items-center gap-2 mb-2">
-            <Bell className="h-4 w-4 text-pink-500" />
-            <span className="text-xs text-muted-foreground">Active</span>
+
+          <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
+            <div className="flex items-center gap-2 mb-2">
+              <Plane className="h-4 w-4 text-indigo-500" />
+              <span className="text-xs text-muted-foreground">Upcoming</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.upcomingTrips}</p>
+            <p className="text-xs text-muted-foreground">trips</p>
           </div>
-          <p className="text-2xl font-bold">{stats.activeReminders}</p>
-          <p className="text-xs text-muted-foreground">reminders</p>
+
+          <div className="frosted-glass rounded-2xl p-4 stat-card cursor-pointer">
+            <div className="flex items-center gap-2 mb-2">
+              <Bell className="h-4 w-4 text-pink-500" />
+              <span className="text-xs text-muted-foreground">Active</span>
+            </div>
+            <p className="text-2xl font-bold">{stats.activeReminders}</p>
+            <p className="text-xs text-muted-foreground">reminders</p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Activity Feed */}
       <ActivityFeed />
@@ -240,8 +258,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Add FAB */}
-      <QuickAddFab />
     </div>
   );
 }

@@ -4,6 +4,8 @@ import "./globals.css";
 import { Navigation } from "@/components/Navigation";
 import { BottomNav } from "@/components/BottomNav";
 import { ToastProvider } from "@/components/ui/toast";
+import { QuickAddFab } from "@/components/QuickAddFab";
+import { ThemeProvider } from 'next-themes';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,24 +53,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ToastProvider>
-          {/* Desktop top navigation */}
-          <Navigation />
-          
-          {/* Main content with safe areas */}
-          <main className="pt-safe pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen">
-            <div className="pt-16 md:pt-20">
-              {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ToastProvider>
+            {/* Desktop top navigation */}
+            <Navigation />
+
+            {/* Main content with safe areas */}
+            <main className="pt-safe pb-24 md:pb-8 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto min-h-screen">
+              <div className="pt-16 md:pt-20">
+                {children}
+              </div>
+            </main>
+
+            {/* Mobile bottom navigation */}
+            <BottomNav />
+
+            {/* Mobile Quick Add FAB - hidden on desktop */}
+            <div className="md:hidden">
+              <QuickAddFab />
             </div>
-          </main>
-          
-          {/* Mobile bottom navigation */}
-          <BottomNav />
-        </ToastProvider>
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

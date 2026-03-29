@@ -14,6 +14,9 @@ import {
   ChevronRight,
   Users,
   Terminal,
+  FolderKanban,
+  BookOpen,
+  Clock,
 } from 'lucide-react';
 
 interface MoreMenuProps {
@@ -24,6 +27,9 @@ interface MoreMenuProps {
 const menuItems = [
   { href: '/contacts', label: 'Contacts', icon: Users, description: 'Personal CRM' },
   { href: '/commands', label: 'Commands', icon: Terminal, description: 'Bot slash commands' },
+  { href: '/cron-jobs', label: 'Cron Jobs', icon: Clock, description: 'Scheduled automations' },
+  { href: '/projects', label: 'Projects', icon: FolderKanban, description: 'Project tracker' },
+  { href: '/resources', label: 'Resources', icon: BookOpen, description: 'Saved resources' },
   { href: '/decisions', label: 'Decisions', icon: Scale, description: 'Decision log' },
   { href: '/content', label: 'Content', icon: Video, description: 'Content pipeline' },
   { href: '/skills', label: 'Skills', icon: Files, description: 'OpenClaw skills library' },

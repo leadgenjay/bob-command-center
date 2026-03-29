@@ -1,7 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSupabase } from '@/lib/supabase';
+import { Users, Plus, Search, X, Star, Pencil, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Contact {
   id: string;
@@ -23,514 +34,760 @@ interface Contact {
 }
 
 const RELATIONSHIP_TYPES = [
-  'employee', 'friend', 'colleague', 'vendor', 'client', 'family', 'investor', 'mentor'
+  'employee', 'friend', 'colleague', 'vendor', 'client', 'family', 'investor', 'mentor',
 ];
 
 const SUGGESTED_TAGS = [
-  'leadgenjay', 'nextwave', 'personal', 'n8n-insiders', 'vip', 'inner-circle', 
-  'local', 'remote', 'active', 'dormant'
+  'leadgenjay', 'nextwave', 'personal', 'n8n-insiders', 'vip', 'inner-circle',
+  'local', 'remote', 'active', 'dormant',
 ];
+
+const EMPTY_FORM = {
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  company: '',
+  role: '',
+  relationship_type: '',
+  how_we_met: '',
+  context: '',
+  tags: [] as string[],
+  notes: '',
+  is_vip: false,
+};
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [selectedRelationship, setSelectedRelationship] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [allTags, setAllTags] = useState<string[]>([]);
 
-  // Form state
-  const [formData, setFormData] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    company: '',
-    role: '',
-    relationship_type: '',
-    how_we_met: '',
-    context: '',
-    tags: [] as string[],
-    notes: '',
-    is_vip: false
-  });
+  // Sheet state
+  const [showSheet, setShowSheet] = useState(false);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [formData, setFormData] = useState({ ...EMPTY_FORM });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Detail modal
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+
+  // Delete dialog
+  const [deleteContactId, setDeleteContactId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchContacts();
   }, []);
 
+  // Escape key closes sheet and detail modal
   useEffect(() => {
-    filterContacts();
-  }, [contacts, searchQuery, selectedTag, selectedRelationship]);
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        if (showSheet) closeSheet();
+        else if (selectedContact) setSelectedContact(null);
+      }
+    }
+    if (showSheet || selectedContact) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = '';
+    };
+  }, [showSheet, selectedContact]);
 
   async function fetchContacts() {
     setLoading(true);
-    const { data, error } = await getSupabase()
-      .from('contacts')
-      .select('*')
-      .order('first_name', { ascending: true });
-    
-    if (error) {
-      console.error('Error fetching contacts:', error);
-    } else {
-      setContacts(data || []);
-      // Extract all unique tags
-      const tags = new Set<string>();
-      data?.forEach(c => c.tags?.forEach((t: string) => tags.add(t)));
-      setAllTags(Array.from(tags).sort());
-    }
-    setLoading(false);
-  }
-
-  function filterContacts() {
-    let filtered = [...contacts];
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(c => 
-        c.first_name?.toLowerCase().includes(query) ||
-        c.last_name?.toLowerCase().includes(query) ||
-        c.email?.toLowerCase().includes(query) ||
-        c.company?.toLowerCase().includes(query) ||
-        c.notes?.toLowerCase().includes(query)
-      );
-    }
-    
-    if (selectedTag) {
-      filtered = filtered.filter(c => c.tags?.includes(selectedTag));
-    }
-    
-    if (selectedRelationship) {
-      filtered = filtered.filter(c => c.relationship_type === selectedRelationship);
-    }
-    
-    setFilteredContacts(filtered);
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    
-    const { error } = await getSupabase()
-      .from('contacts')
-      .insert([formData]);
-    
-    if (error) {
-      console.error('Error adding contact:', error);
-      alert('Error adding contact');
-    } else {
-      setShowAddForm(false);
-      setFormData({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        company: '',
-        role: '',
-        relationship_type: '',
-        how_we_met: '',
-        context: '',
-        tags: [],
-        notes: '',
-        is_vip: false
-      });
-      fetchContacts();
+    try {
+      const res = await fetch('/api/contacts');
+      if (res.ok) {
+        const data = await res.json();
+        setContacts(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch contacts:', error);
+    } finally {
+      setLoading(false);
     }
   }
 
-  async function deleteContact(id: string) {
-    if (!confirm('Delete this contact?')) return;
-    
-    const { error } = await getSupabase()
-      .from('contacts')
-      .delete()
-      .eq('id', id);
-    
-    if (!error) {
-      setSelectedContact(null);
-      fetchContacts();
-    }
+  function openAddSheet() {
+    setEditingContact(null);
+    setFormData({ ...EMPTY_FORM });
+    setShowSheet(true);
+  }
+
+  function openEditSheet(contact: Contact) {
+    setEditingContact(contact);
+    setFormData({
+      first_name: contact.first_name,
+      last_name: contact.last_name || '',
+      email: contact.email || '',
+      phone: contact.phone || '',
+      company: contact.company || '',
+      role: contact.role || '',
+      relationship_type: contact.relationship_type || '',
+      how_we_met: contact.how_we_met || '',
+      context: contact.context || '',
+      tags: contact.tags || [],
+      notes: contact.notes || '',
+      is_vip: contact.is_vip,
+    });
+    setSelectedContact(null);
+    setShowSheet(true);
+  }
+
+  function closeSheet() {
+    setShowSheet(false);
+    setEditingContact(null);
+    setFormData({ ...EMPTY_FORM });
   }
 
   function toggleTag(tag: string) {
     setFormData(prev => ({
       ...prev,
-      tags: prev.tags.includes(tag) 
+      tags: prev.tags.includes(tag)
         ? prev.tags.filter(t => t !== tag)
-        : [...prev.tags, tag]
+        : [...prev.tags, tag],
     }));
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!formData.first_name.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ...formData,
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim() || null,
+        email: formData.email.trim() || null,
+        phone: formData.phone.trim() || null,
+        company: formData.company.trim() || null,
+        role: formData.role.trim() || null,
+        relationship_type: formData.relationship_type || null,
+        how_we_met: formData.how_we_met.trim() || null,
+        context: formData.context.trim() || null,
+        notes: formData.notes.trim() || null,
+        tags: formData.tags.length > 0 ? formData.tags : null,
+      };
+
+      if (editingContact) {
+        const res = await fetch('/api/contacts', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: editingContact.id, ...payload }),
+        });
+        if (res.ok) {
+          const updated: Contact = await res.json();
+          setContacts(prev => prev.map(c => c.id === updated.id ? updated : c));
+          closeSheet();
+        }
+      } else {
+        const res = await fetch('/api/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          const created: Contact = await res.json();
+          setContacts(prev => [created, ...prev]);
+          closeSheet();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save contact:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function executeDelete() {
+    if (!deleteContactId) return;
+    try {
+      const res = await fetch(`/api/contacts?id=${deleteContactId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setContacts(prev => prev.filter(c => c.id !== deleteContactId));
+        setSelectedContact(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete contact:', error);
+    } finally {
+      setDeleteContactId(null);
+    }
+  }
+
+  // Filtering
+  const filteredContacts = contacts.filter(c => {
+    if (selectedRelationship && c.relationship_type !== selectedRelationship) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return (
+        c.first_name?.toLowerCase().includes(q) ||
+        c.last_name?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        c.company?.toLowerCase().includes(q) ||
+        c.notes?.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
+
+  const relationshipFilters: (string | null)[] = [null, ...RELATIONSHIP_TYPES];
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Contacts</h1>
-            <p className="text-gray-400">{contacts.length} contacts</p>
+    <div className="space-y-5 md:space-y-6 animate-slide-up">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg">
+            <Users className="h-5 w-5 text-white" />
           </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center gap-2"
-          >
-            <span>+</span> Add Contact
-          </button>
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold">Contacts</h1>
+            <p className="text-xs md:text-sm text-muted-foreground">
+              {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
 
-        <div className="flex gap-6">
-          {/* Sidebar Filters */}
-          <div className="w-64 flex-shrink-0">
-            {/* Search */}
-            <input
-              type="text"
-              placeholder="Search contacts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 mb-4"
-            />
+        <button
+          onClick={openAddSheet}
+          className={cn(
+            'h-10 w-10 rounded-xl bg-primary text-white',
+            'flex items-center justify-center shadow-lg',
+            'hover:shadow-xl active:scale-95 transition-all'
+          )}
+        >
+          <Plus className="h-5 w-5" />
+        </button>
+      </div>
 
-            {/* Relationship Filter */}
-            <div className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-400 mb-2">RELATIONSHIP</h3>
-              <div className="space-y-1">
-                <button
-                  onClick={() => setSelectedRelationship(null)}
-                  className={`w-full text-left px-3 py-1.5 rounded ${!selectedRelationship ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-                >
-                  All
-                </button>
-                {RELATIONSHIP_TYPES.map(type => (
-                  <button
-                    key={type}
-                    onClick={() => setSelectedRelationship(type)}
-                    className={`w-full text-left px-3 py-1.5 rounded capitalize ${selectedRelationship === type ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <input
+          type="text"
+          placeholder="Search contacts..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          className={cn(
+            'w-full pl-9 pr-4 py-2.5 rounded-xl bg-muted/50 border border-border',
+            'focus:outline-none focus:ring-2 focus:ring-primary/50',
+            'placeholder:text-muted-foreground/50 text-sm'
+          )}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
-            {/* Tags Filter */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-400 mb-2">TAGS</h3>
-              <div className="space-y-1">
-                <button
-                  onClick={() => setSelectedTag(null)}
-                  className={`w-full text-left px-3 py-1.5 rounded ${!selectedTag ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-                >
-                  All Tags
-                </button>
-                {allTags.map(tag => (
-                  <button
-                    key={tag}
-                    onClick={() => setSelectedTag(tag)}
-                    className={`w-full text-left px-3 py-1.5 rounded ${selectedTag === tag ? 'bg-blue-600' : 'hover:bg-gray-800'}`}
-                  >
-                    #{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
+      {/* Relationship Filter Chips */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+        {relationshipFilters.map(rel => {
+          const count = rel === null
+            ? contacts.length
+            : contacts.filter(c => c.relationship_type === rel).length;
+          return (
+            <button
+              key={rel ?? 'all'}
+              onClick={() => setSelectedRelationship(rel)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap',
+                'transition-all duration-200 active:scale-95',
+                selectedRelationship === rel
+                  ? 'bg-primary text-white shadow-md'
+                  : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+              )}
+            >
+              <span>{rel === null ? 'All' : rel.charAt(0).toUpperCase() + rel.slice(1)}</span>
+              <span className={cn(
+                'px-1.5 py-0.5 rounded-md text-xs',
+                selectedRelationship === rel ? 'bg-white/20' : 'bg-muted'
+              )}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Contact List */}
+      <div className="space-y-3">
+        {loading ? (
+          <div className="frosted-glass rounded-2xl p-8 text-center">
+            <p className="text-muted-foreground">Loading...</p>
           </div>
-
-          {/* Contact List */}
-          <div className="flex-1">
-            {loading ? (
-              <div className="text-center py-12 text-gray-400">Loading...</div>
-            ) : filteredContacts.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                {contacts.length === 0 ? 'No contacts yet. Add your first contact!' : 'No contacts match your filters.'}
-              </div>
-            ) : (
-              <div className="grid gap-3">
-                {filteredContacts.map(contact => (
-                  <div
-                    key={contact.id}
-                    onClick={() => setSelectedContact(contact)}
-                    className="bg-gray-800 rounded-lg p-4 cursor-pointer hover:bg-gray-750 border border-gray-700 hover:border-gray-600"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-lg">
-                            {contact.first_name} {contact.last_name}
-                          </h3>
-                          {contact.is_vip && (
-                            <span className="text-yellow-500">⭐</span>
-                          )}
-                        </div>
-                        {contact.company && (
-                          <p className="text-gray-400">{contact.role ? `${contact.role} at ` : ''}{contact.company}</p>
-                        )}
-                        <div className="flex gap-4 mt-1 text-sm text-gray-500">
-                          {contact.email && <span>{contact.email}</span>}
-                          {contact.phone && <span>{contact.phone}</span>}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {contact.relationship_type && (
-                          <span className="text-xs bg-gray-700 px-2 py-1 rounded capitalize">
-                            {contact.relationship_type}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {contact.tags && contact.tags.length > 0 && (
-                      <div className="flex gap-2 mt-2 flex-wrap">
-                        {contact.tags.map(tag => (
-                          <span key={tag} className="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded">
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+        ) : filteredContacts.length === 0 ? (
+          <div className="frosted-glass rounded-2xl p-8 text-center">
+            <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-muted-foreground">
+              {contacts.length === 0 ? 'No contacts yet. Add your first contact!' : 'No contacts match your filters.'}
+            </p>
+            {contacts.length === 0 && (
+              <button
+                onClick={openAddSheet}
+                className="mt-4 px-4 py-2 bg-primary text-white rounded-xl text-sm font-medium"
+              >
+                Add your first contact
+              </button>
             )}
           </div>
-        </div>
-
-        {/* Add Contact Modal */}
-        {showAddForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold mb-4">Add Contact</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">First Name *</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.first_name}
-                      onChange={(e) => setFormData({...formData, first_name: e.target.value})}
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                    />
+        ) : (
+          filteredContacts.map(contact => (
+            <div
+              key={contact.id}
+              onClick={() => setSelectedContact(contact)}
+              className="frosted-glass rounded-2xl p-4 md:p-5 cursor-pointer hover:shadow-md transition-all active:scale-[0.99]"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-base truncate">
+                      {contact.first_name} {contact.last_name}
+                    </h3>
+                    {contact.is_vip && (
+                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Last Name</label>
-                    <input
-                      type="text"
-                      value={formData.last_name}
-                      onChange={(e) => setFormData({...formData, last_name: e.target.value})}
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                    />
+                  {contact.company && (
+                    <p className="text-sm text-muted-foreground truncate">
+                      {contact.role ? `${contact.role} at ` : ''}{contact.company}
+                    </p>
+                  )}
+                  <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                    {contact.email && <span className="truncate">{contact.email}</span>}
+                    {contact.phone && <span className="truncate">{contact.phone}</span>}
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Phone</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                    />
-                  </div>
+                {contact.relationship_type && (
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full capitalize flex-shrink-0">
+                    {contact.relationship_type}
+                  </span>
+                )}
+              </div>
+              {contact.tags && contact.tags.length > 0 && (
+                <div className="flex gap-1.5 mt-3 flex-wrap">
+                  {contact.tags.map(tag => (
+                    <span key={tag} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      #{tag}
+                    </span>
+                  ))}
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Company</label>
-                    <input
-                      type="text"
-                      value={formData.company}
-                      onChange={(e) => setFormData({...formData, company: e.target.value})}
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Role</label>
-                    <input
-                      type="text"
-                      value={formData.role}
-                      onChange={(e) => setFormData({...formData, role: e.target.value})}
-                      className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Relationship Type</label>
-                  <select
-                    value={formData.relationship_type}
-                    onChange={(e) => setFormData({...formData, relationship_type: e.target.value})}
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                  >
-                    <option value="">Select...</option>
-                    {RELATIONSHIP_TYPES.map(type => (
-                      <option key={type} value={type} className="capitalize">{type}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">How We Met</label>
-                  <input
-                    type="text"
-                    value={formData.how_we_met}
-                    onChange={(e) => setFormData({...formData, how_we_met: e.target.value})}
-                    placeholder="Conference, referral, online..."
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Tags</label>
-                  <div className="flex flex-wrap gap-2">
-                    {SUGGESTED_TAGS.map(tag => (
-                      <button
-                        key={tag}
-                        type="button"
-                        onClick={() => toggleTag(tag)}
-                        className={`px-3 py-1 rounded text-sm ${
-                          formData.tags.includes(tag) 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                        }`}
-                      >
-                        #{tag}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Notes</label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    rows={3}
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="is_vip"
-                    checked={formData.is_vip}
-                    onChange={(e) => setFormData({...formData, is_vip: e.target.checked})}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="is_vip">⭐ VIP Contact</label>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAddForm(false)}
-                    className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 py-2 rounded"
-                  >
-                    Add Contact
-                  </button>
-                </div>
-              </form>
+              )}
             </div>
-          </div>
+          ))
         )}
+      </div>
 
-        {/* Contact Detail Modal */}
-        {selectedContact && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-xl p-6 w-full max-w-lg">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h2 className="text-2xl font-bold flex items-center gap-2">
-                    {selectedContact.first_name} {selectedContact.last_name}
-                    {selectedContact.is_vip && <span className="text-yellow-500">⭐</span>}
-                  </h2>
+      {/* Contact Detail Modal */}
+      {selectedContact && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/40 z-50 animate-fade-in"
+            onClick={() => setSelectedContact(null)}
+          />
+          <div className="fixed inset-x-4 top-1/2 -translate-y-1/2 z-50 max-w-lg mx-auto animate-slide-up">
+            <div className="frosted-glass rounded-2xl p-5 shadow-2xl max-h-[85vh] overflow-y-auto">
+              {/* Detail header */}
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold truncate">
+                      {selectedContact.first_name} {selectedContact.last_name}
+                    </h2>
+                    {selectedContact.is_vip && (
+                      <Star className="h-5 w-5 text-yellow-500 fill-yellow-500 flex-shrink-0" />
+                    )}
+                  </div>
                   {selectedContact.company && (
-                    <p className="text-gray-400">
+                    <p className="text-sm text-muted-foreground">
                       {selectedContact.role ? `${selectedContact.role} at ` : ''}{selectedContact.company}
                     </p>
                   )}
                 </div>
-                <button onClick={() => setSelectedContact(null)} className="text-gray-400 hover:text-white text-2xl">
-                  ×
+                <button
+                  onClick={() => setSelectedContact(null)}
+                  className="h-8 w-8 rounded-xl bg-muted flex items-center justify-center ml-2 flex-shrink-0 active:scale-95 transition-transform"
+                >
+                  <X className="h-4 w-4" />
                 </button>
               </div>
 
+              {/* Detail fields */}
               <div className="space-y-3 text-sm">
                 {selectedContact.email && (
-                  <div>
-                    <span className="text-gray-400">Email:</span>{' '}
-                    <a href={`mailto:${selectedContact.email}`} className="text-blue-400">{selectedContact.email}</a>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">Email</span>
+                    <a href={`mailto:${selectedContact.email}`} className="text-primary truncate">
+                      {selectedContact.email}
+                    </a>
                   </div>
                 )}
                 {selectedContact.phone && (
-                  <div>
-                    <span className="text-gray-400">Phone:</span>{' '}
-                    <a href={`tel:${selectedContact.phone}`} className="text-blue-400">{selectedContact.phone}</a>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">Phone</span>
+                    <a href={`tel:${selectedContact.phone}`} className="text-primary">
+                      {selectedContact.phone}
+                    </a>
                   </div>
                 )}
                 {selectedContact.relationship_type && (
-                  <div>
-                    <span className="text-gray-400">Relationship:</span>{' '}
-                    <span className="capitalize">{selectedContact.relationship_type}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">Relationship</span>
+                    <span className="capitalize bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
+                      {selectedContact.relationship_type}
+                    </span>
                   </div>
                 )}
                 {selectedContact.how_we_met && (
-                  <div>
-                    <span className="text-gray-400">How we met:</span> {selectedContact.how_we_met}
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">How we met</span>
+                    <span>{selectedContact.how_we_met}</span>
+                  </div>
+                )}
+                {selectedContact.context && (
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">Context</span>
+                    <span className="text-foreground/80">{selectedContact.context}</span>
                   </div>
                 )}
                 {selectedContact.notes && (
-                  <div>
-                    <span className="text-gray-400">Notes:</span>
-                    <p className="mt-1 text-gray-300">{selectedContact.notes}</p>
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">Notes</span>
+                    <span className="text-foreground/80 whitespace-pre-wrap">{selectedContact.notes}</span>
                   </div>
                 )}
                 {selectedContact.tags && selectedContact.tags.length > 0 && (
-                  <div className="flex gap-2 flex-wrap pt-2">
-                    {selectedContact.tags.map(tag => (
-                      <span key={tag} className="text-xs bg-blue-900 text-blue-300 px-2 py-0.5 rounded">
-                        #{tag}
-                      </span>
-                    ))}
+                  <div className="flex items-start gap-2">
+                    <span className="text-muted-foreground w-24 flex-shrink-0">Tags</span>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {selectedContact.tags.map(tag => (
+                        <span key={tag} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
 
+              {/* Detail actions */}
               <div className="flex gap-3 mt-6">
                 <button
-                  onClick={() => deleteContact(selectedContact.id)}
-                  className="flex-1 bg-red-600 hover:bg-red-700 py-2 rounded"
+                  onClick={() => openEditSheet(selectedContact)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted text-foreground text-sm font-medium active:scale-95 transition-all"
                 >
-                  Delete
+                  <Pencil className="h-4 w-4" />
+                  Edit
                 </button>
                 <button
-                  onClick={() => setSelectedContact(null)}
-                  className="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded"
+                  onClick={() => { setDeleteContactId(selectedContact.id); }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-destructive/10 text-destructive text-sm font-medium active:scale-95 transition-all"
                 >
-                  Close
+                  <Trash2 className="h-4 w-4" />
+                  Delete
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
+
+      {/* Add / Edit Bottom Sheet */}
+      {showSheet && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-fade-in"
+            onClick={closeSheet}
+          />
+          <div className={cn(
+            'fixed inset-x-0 bottom-0 z-50 max-h-[92vh]',
+            'bg-background rounded-t-3xl shadow-2xl',
+            'animate-slide-up-sheet'
+          )}>
+            {/* Drag handle */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+
+            {/* Sheet header */}
+            <div className="flex items-center justify-between px-6 pb-4">
+              <h2 className="text-xl font-bold">
+                {editingContact ? 'Edit Contact' : 'New Contact'}
+              </h2>
+              <button
+                onClick={closeSheet}
+                className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center active:scale-95 transition-transform"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form
+              onSubmit={handleSubmit}
+              className="px-6 pb-8 space-y-4 overflow-y-auto max-h-[calc(92vh-100px)]"
+            >
+              {/* Name row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.first_name}
+                    onChange={e => setFormData(p => ({ ...p, first_name: e.target.value }))}
+                    placeholder="First"
+                    className={cn(
+                      'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                      'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      'placeholder:text-muted-foreground/50 text-sm'
+                    )}
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    onChange={e => setFormData(p => ({ ...p, last_name: e.target.value }))}
+                    placeholder="Last"
+                    className={cn(
+                      'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                      'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      'placeholder:text-muted-foreground/50 text-sm'
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Email / Phone */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
+                    placeholder="email@example.com"
+                    className={cn(
+                      'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                      'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      'placeholder:text-muted-foreground/50 text-sm'
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
+                    placeholder="+1 555 000 0000"
+                    className={cn(
+                      'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                      'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      'placeholder:text-muted-foreground/50 text-sm'
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Company / Role */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    Company
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.company}
+                    onChange={e => setFormData(p => ({ ...p, company: e.target.value }))}
+                    placeholder="Acme Inc."
+                    className={cn(
+                      'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                      'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      'placeholder:text-muted-foreground/50 text-sm'
+                    )}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                    Role
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.role}
+                    onChange={e => setFormData(p => ({ ...p, role: e.target.value }))}
+                    placeholder="CEO, Engineer..."
+                    className={cn(
+                      'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                      'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                      'placeholder:text-muted-foreground/50 text-sm'
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Relationship Type */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                  Relationship Type
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {RELATIONSHIP_TYPES.map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setFormData(p => ({
+                        ...p,
+                        relationship_type: p.relationship_type === type ? '' : type,
+                      }))}
+                      className={cn(
+                        'px-3 py-1.5 rounded-xl text-sm font-medium capitalize transition-all active:scale-95',
+                        formData.relationship_type === type
+                          ? 'bg-primary text-white shadow-md'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-border'
+                      )}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* How we met */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                  How We Met
+                </label>
+                <input
+                  type="text"
+                  value={formData.how_we_met}
+                  onChange={e => setFormData(p => ({ ...p, how_we_met: e.target.value }))}
+                  placeholder="Conference, referral, online..."
+                  className={cn(
+                    'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                    'placeholder:text-muted-foreground/50 text-sm'
+                  )}
+                />
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                  Tags
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {SUGGESTED_TAGS.map(tag => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => toggleTag(tag)}
+                      className={cn(
+                        'px-3 py-1.5 rounded-xl text-sm font-medium transition-all active:scale-95',
+                        formData.tags.includes(tag)
+                          ? 'bg-primary text-white shadow-md'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted border border-border'
+                      )}
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1.5 block">
+                  Notes
+                </label>
+                <textarea
+                  value={formData.notes}
+                  onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))}
+                  placeholder="Any additional context..."
+                  rows={3}
+                  className={cn(
+                    'w-full px-3 py-2 rounded-xl bg-muted/50 border border-border resize-none',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                    'placeholder:text-muted-foreground/50 text-sm'
+                  )}
+                />
+              </div>
+
+              {/* VIP toggle */}
+              <button
+                type="button"
+                onClick={() => setFormData(p => ({ ...p, is_vip: !p.is_vip }))}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-95 w-full',
+                  formData.is_vip
+                    ? 'bg-yellow-500/20 text-yellow-600 border border-yellow-500/30'
+                    : 'bg-muted/50 text-muted-foreground border border-border hover:bg-muted'
+                )}
+              >
+                <Star className={cn('h-4 w-4', formData.is_vip && 'fill-yellow-500 text-yellow-500')} />
+                {formData.is_vip ? 'VIP Contact' : 'Mark as VIP'}
+              </button>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={!formData.first_name.trim() || isSubmitting}
+                className={cn(
+                  'w-full py-4 rounded-2xl font-semibold text-white',
+                  'bg-gradient-to-r from-primary to-purple-600',
+                  'shadow-lg hover:shadow-xl transition-all',
+                  'disabled:opacity-50 disabled:cursor-not-allowed',
+                  'active:scale-[0.98] flex items-center justify-center gap-2'
+                )}
+              >
+                <Plus className="h-5 w-5" />
+                {isSubmitting
+                  ? (editingContact ? 'Saving...' : 'Adding...')
+                  : (editingContact ? 'Save Changes' : 'Add Contact')}
+              </button>
+            </form>
+          </div>
+        </>
+      )}
+
+      {/* Delete Confirmation */}
+      <AlertDialog
+        open={deleteContactId !== null}
+        onOpenChange={open => { if (!open) setDeleteContactId(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this contact.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteContactId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={executeDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

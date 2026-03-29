@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Clock, CheckCircle2, XCircle, AlertCircle, Calendar } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 
 interface CronJob {
   id: string;
@@ -23,7 +24,7 @@ interface CronJob {
   };
 }
 
-const cronJobs: CronJob[] = [
+const FALLBACK_CRON_JOBS: CronJob[] = [
   {
     id: '1',
     name: 'Email Check',
@@ -261,7 +262,28 @@ const cronJobs: CronJob[] = [
 ];
 
 export default function CronJobsPage() {
-  const [jobs] = useState<CronJob[]>(cronJobs);
+  const [jobs, setJobs] = useState<CronJob[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  async function fetchJobs() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/cron-jobs');
+      if (res.ok) {
+        const data = await res.json();
+        setJobs(data.length > 0 ? data : FALLBACK_CRON_JOBS);
+      } else {
+        setJobs(FALLBACK_CRON_JOBS);
+      }
+    } catch {
+      setJobs(FALLBACK_CRON_JOBS);
+    }
+    setLoading(false);
+  }
 
   const getStatusIcon = (status?: string) => {
     switch (status) {
@@ -288,7 +310,7 @@ export default function CronJobsPage() {
           <div>
             <h1 className="text-xl md:text-2xl font-bold">Cron Jobs</h1>
             <p className="text-xs md:text-sm text-muted-foreground">
-              {activeJobs.length} active • {inactiveJobs.length} inactive
+              {loading ? 'Loading...' : `${activeJobs.length} active • ${inactiveJobs.length} inactive`}
             </p>
           </div>
         </div>
@@ -297,51 +319,67 @@ export default function CronJobsPage() {
       {/* Active Jobs */}
       <Card className="frosted-glass border-0 shadow-lg">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Active Jobs ({activeJobs.length})</CardTitle>
+          <CardTitle className="text-base">
+            {loading ? 'Active Jobs' : `Active Jobs (${activeJobs.length})`}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          {activeJobs.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              <Clock className="h-12 w-12 mx-auto mb-3 opacity-20" />
-              <p className="text-sm font-medium">No active cron jobs</p>
-            </div>
-          ) : (
-            activeJobs.map((job, index) => (
-              <div
-                key={job.id}
-                className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted/70 group transition-all duration-200"
-                style={{ animationDelay: `${index * 30}ms` }}
-              >
-                {/* Status Icon */}
-                <div className="shrink-0 mt-0.5">
-                  {getStatusIcon(job.state?.lastStatus)}
-                </div>
-                
-                {/* Job Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{job.name}</p>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <span className="text-xs text-muted-foreground font-mono">
-                      {job.schedule.expr || 'Custom schedule'}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Agent: {job.agentId}
-                    </span>
-                  </div>
-                  {job.description && (
-                    <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">
-                      {job.description}
-                    </p>
-                  )}
+        {loading ? (
+          <CardContent className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-muted/50">
+                <Skeleton className="h-4 w-4 rounded-full mt-0.5" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-3 w-[150px]" />
                 </div>
               </div>
-            ))
-          )}
-        </CardContent>
+            ))}
+          </CardContent>
+        ) : (
+          <CardContent className="space-y-2">
+            {activeJobs.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground">
+                <Clock className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                <p className="text-sm font-medium">No active cron jobs</p>
+              </div>
+            ) : (
+              activeJobs.map((job, index) => (
+                <div
+                  key={job.id}
+                  className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted/70 group transition-all duration-200"
+                  style={{ animationDelay: `${index * 30}ms` }}
+                >
+                  {/* Status Icon */}
+                  <div className="shrink-0 mt-0.5">
+                    {getStatusIcon(job.state?.lastStatus)}
+                  </div>
+
+                  {/* Job Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{job.name}</p>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <span className="text-xs text-muted-foreground font-mono">
+                        {job.schedule.expr || 'Custom schedule'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Agent: {job.agentId}
+                      </span>
+                    </div>
+                    {job.description && (
+                      <p className="text-xs text-muted-foreground/70 mt-1 leading-relaxed">
+                        {job.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        )}
       </Card>
 
       {/* Inactive Jobs (if any) */}
-      {inactiveJobs.length > 0 && (
+      {!loading && inactiveJobs.length > 0 && (
         <Card className="frosted-glass border-0 shadow-lg opacity-60">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Inactive Jobs ({inactiveJobs.length})</CardTitle>

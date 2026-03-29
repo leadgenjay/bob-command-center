@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 import {
   LayoutDashboard,
   Kanban,
@@ -20,16 +21,22 @@ import {
   Users,
   Terminal,
   BookOpen,
+  MoreHorizontal,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
-const navItems = [
+const primaryNavItems = [
   { href: '/tasks', label: 'Tasks', icon: Kanban },
-  { href: '/cron-jobs', label: 'Cron Jobs', icon: Clock },
-  { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/trips', label: 'Trips', icon: Plane },
   { href: '/ideas', label: 'Ideas', icon: Lightbulb },
-  { href: '/commands', label: 'Commands', icon: Terminal },
+  { href: '/contacts', label: 'Contacts', icon: Users },
   { href: '/content', label: 'Content', icon: Video },
+  { href: '/commands', label: 'Commands', icon: Terminal },
+];
+
+const secondaryNavItems = [
+  { href: '/cron-jobs', label: 'Cron Jobs', icon: Clock },
   { href: '/resources', label: 'Resources', icon: BookOpen },
   { href: '/skills', label: 'Skills', icon: Files },
   { href: '/sops', label: 'SOPs', icon: FileText },
@@ -38,6 +45,13 @@ const navItems = [
 export function Navigation() {
   const pathname = usePathname();
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showMoreNav, setShowMoreNav] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <>
@@ -58,7 +72,7 @@ export function Navigation() {
 
             {/* Desktop Nav Items - hidden on mobile (use bottom nav instead) */}
             <div className="hidden md:flex items-center gap-1">
-              {navItems.map(item => {
+              {primaryNavItems.map(item => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
@@ -79,11 +93,78 @@ export function Navigation() {
                   </Link>
                 );
               })}
+
+              {/* More dropdown trigger */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowMoreNav(!showMoreNav)}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium',
+                    'transition-all duration-200 min-h-[44px]',
+                    'active:scale-95',
+                    showMoreNav || secondaryNavItems.some(item => pathname === item.href)
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  )}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span>More</span>
+                </button>
+
+                {showMoreNav && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMoreNav(false)} />
+                    <div className="absolute top-full right-0 mt-2 z-50 w-56 animate-scale-in">
+                      <div className="frosted-glass-strong rounded-2xl shadow-2xl overflow-hidden border border-border">
+                        <div className="p-2">
+                          {secondaryNavItems.map(item => {
+                            const Icon = item.icon;
+                            const isActive = pathname === item.href;
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setShowMoreNav(false)}
+                                className={cn(
+                                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
+                                  isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted/50'
+                                )}
+                              >
+                                <Icon className="h-4 w-4" />
+                                <span className="text-sm font-medium">{item.label}</span>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
+
+            {/* Theme Toggle */}
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className={cn(
+                  'h-10 w-10 rounded-full flex items-center justify-center',
+                  'transition-all duration-200 active:scale-95',
+                  'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                )}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </button>
+            )}
 
             {/* Add Button */}
             <button
-              onClick={() => setShowAddMenu(!showAddMenu)}
+              onClick={() => { setShowAddMenu(!showAddMenu); setShowMoreNav(false); }}
               className={cn(
                 'h-10 w-10 rounded-full flex items-center justify-center',
                 'transition-all duration-200 active:scale-95',

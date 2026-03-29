@@ -26,9 +26,10 @@ function TasksPageContent() {
     }
   }, [searchParams, router]);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const handleTaskAdded = useCallback(() => {
-    // Trigger a page reload to refresh the board
-    window.location.reload();
+    setRefreshKey(k => k + 1);
   }, []);
 
   return (
@@ -62,7 +63,7 @@ function TasksPageContent() {
 
       {/* Board - full bleed on mobile */}
       <div className="frosted-glass rounded-2xl p-3 md:p-5 -mx-4 sm:mx-0">
-        <KanbanBoard />
+        <KanbanBoard key={refreshKey} />
       </div>
 
       {/* Add Task Sheet */}

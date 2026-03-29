@@ -25,8 +25,10 @@ function IdeasPageContent() {
     }
   }, [searchParams, router]);
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const handleIdeaAdded = useCallback(() => {
-    window.location.reload();
+    setRefreshKey(k => k + 1);
   }, []);
 
   return (
@@ -60,7 +62,7 @@ function IdeasPageContent() {
 
       {/* Full width ideas vault */}
       <div className="max-w-2xl">
-        <IdeasVault />
+        <IdeasVault key={refreshKey} />
       </div>
 
       {/* Add Idea Sheet */}

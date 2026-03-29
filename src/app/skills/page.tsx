@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Zap, Search, ChevronRight, ExternalLink } from 'lucide-react';
+import { Zap, Search, ChevronRight } from 'lucide-react';
 
 interface Skill {
   name: string;
@@ -12,7 +13,7 @@ interface Skill {
   location: string;
 }
 
-const skills: Skill[] = [
+const FALLBACK_SKILLS: Skill[] = [
   // System & Productivity
   { name: 'apple-notes', description: 'Manage Apple Notes via the memo CLI on macOS (create, view, edit, delete, search)', category: 'System & Productivity', location: '/opt/homebrew/lib/node_modules/openclaw/skills/apple-notes/SKILL.md' },
   { name: 'things-mac', description: 'Manage Things 3 via the things CLI on macOS — add tasks, list inbox/today, search projects', category: 'System & Productivity', location: '/opt/homebrew/lib/node_modules/openclaw/skills/things-mac/SKILL.md' },
@@ -75,11 +76,33 @@ const skills: Skill[] = [
   { name: 'n8n-workflow-patterns', description: 'Proven workflow architectural patterns: webhook processing, HTTP APIs, database operations, AI agents', category: 'n8n', location: '~/.clawdbot/workspace/skills/n8n/n8n-workflow-patterns/SKILL.md' },
 ];
 
-const categories = ['All', 'System & Productivity', 'Communication', 'Google Workspace', 'AI and Content', 'Business', 'Ads and Marketing', 'n8n'];
+const CATEGORIES = ['All', 'System & Productivity', 'Communication', 'Google Workspace', 'AI and Content', 'Business', 'Ads and Marketing', 'n8n'];
 
 export default function SkillsPage() {
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
+
+  useEffect(() => {
+    fetchSkills();
+  }, []);
+
+  async function fetchSkills() {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/skills');
+      if (res.ok) {
+        const data = await res.json();
+        setSkills(data.length > 0 ? data : FALLBACK_SKILLS);
+      } else {
+        setSkills(FALLBACK_SKILLS);
+      }
+    } catch {
+      setSkills(FALLBACK_SKILLS);
+    }
+    setLoading(false);
+  }
 
   const filteredSkills = skills.filter(skill => {
     const matchesSearch = skill.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -88,8 +111,8 @@ export default function SkillsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  const skillsByCategory = activeCategory === 'All' 
-    ? categories.slice(1).map(cat => ({
+  const skillsByCategory = activeCategory === 'All'
+    ? CATEGORIES.slice(1).map(cat => ({
         category: cat,
         skills: skills.filter(s => s.category === cat)
       }))
@@ -109,7 +132,7 @@ export default function SkillsPage() {
           <div>
             <h1 className="text-xl md:text-2xl font-bold">Skills</h1>
             <p className="text-xs md:text-sm text-muted-foreground">
-              {skills.length} OpenClaw skills available
+              {loading ? 'Loading...' : `${skills.length} OpenClaw skills available`}
             </p>
           </div>
         </div>
@@ -129,7 +152,7 @@ export default function SkillsPage() {
 
       {/* Category Filters */}
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {categories.map(category => (
+        {CATEGORIES.map(category => (
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
@@ -145,8 +168,28 @@ export default function SkillsPage() {
         ))}
       </div>
 
+      {/* Loading Skeletons */}
+      {loading && (
+        <Card className="frosted-glass border-0 shadow-lg">
+          <CardHeader className="pb-3">
+            <Skeleton className="h-5 w-[150px]" />
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-3 w-[300px]" />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Skills by Category */}
-      {search && (
+      {!loading && search && (
         <Card className="frosted-glass border-0 shadow-lg">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Search Results ({filteredSkills.length})</CardTitle>
@@ -166,7 +209,7 @@ export default function SkillsPage() {
         </Card>
       )}
 
-      {!search && skillsByCategory.map(({ category, skills: categorySkills }) => (
+      {!loading && !search && skillsByCategory.map(({ category, skills: categorySkills }) => (
         categorySkills.length > 0 && (
           <Card key={category} className="frosted-glass border-0 shadow-lg">
             <CardHeader className="pb-3">
@@ -205,13 +248,13 @@ function SkillCard({ skill, index }: { skill: Skill; index: number }) {
           <Zap className="h-5 w-5 text-primary" />
         </div>
       </div>
-      
+
       {/* Skill Info */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate font-mono">{skill.name}</p>
         <p className="text-xs text-muted-foreground truncate">{skill.description}</p>
       </div>
-      
+
       {/* Arrow */}
       <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
         <ChevronRight className="h-4 w-4 text-muted-foreground" />

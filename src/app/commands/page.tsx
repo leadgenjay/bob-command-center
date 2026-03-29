@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { Command, COMMAND_CATEGORY_CONFIG, CommandCategory } from '@/lib/types';
-import { getCommands, createCommand, updateCommand, deleteCommand, initializeSampleData } from '@/lib/store';
 import { Terminal, Plus, Copy, Check, Pencil, Trash2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,13 +21,31 @@ export default function CommandsPage() {
     category: 'general' as CommandCategory,
   });
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    initializeSampleData();
     loadCommands();
   }, []);
 
-  const loadCommands = () => {
-    setCommands(getCommands());
+  const loadCommands = async () => {
+    try {
+      const res = await fetch('/api/commands');
+      if (res.ok) {
+        const data = await res.json();
+        // Map API field 'command' -> 'syntax', supply defaults for missing fields
+        const mapped = data.map((row: Record<string, unknown>) => ({
+          ...row,
+          syntax: row.command ?? '',
+          example: row.example ?? null,
+          enabled: row.enabled ?? true,
+        }));
+        setCommands(mapped);
+      }
+    } catch (error) {
+      console.error('Failed to fetch commands:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCopy = (text: string, id: string) => {
@@ -37,20 +54,40 @@ export default function CommandsPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingCommand) {
-      updateCommand(editingCommand.id, formData);
-    } else {
-      createCommand({
-        ...formData,
-        enabled: true,
-      });
+
+    try {
+      if (editingCommand) {
+        await fetch('/api/commands', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: editingCommand.id,
+            name: formData.name,
+            description: formData.description,
+            command: formData.syntax,
+            category: formData.category,
+          }),
+        });
+      } else {
+        await fetch('/api/commands', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            description: formData.description,
+            command: formData.syntax,
+            category: formData.category,
+          }),
+        });
+      }
+
+      await loadCommands();
+      resetForm();
+    } catch (error) {
+      console.error('Failed to save command:', error);
     }
-    
-    loadCommands();
-    resetForm();
   };
 
   const handleEdit = (command: Command) => {
@@ -65,10 +102,12 @@ export default function CommandsPage() {
     setShowAddForm(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Are you sure you want to delete this command?')) {
-      deleteCommand(id);
-      loadCommands();
+  const handleDelete = async (id: string) => {
+    try {
+      await fetch(`/api/commands?id=${id}`, { method: 'DELETE' });
+      await loadCommands();
+    } catch (error) {
+      console.error('Failed to delete command:', error);
     }
   };
 
