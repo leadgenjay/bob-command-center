@@ -82,3 +82,38 @@ export async function GET(request: NextRequest) {
   
   return POST(fakeRequest);
 }
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { title, content, source = 'manual', category, metadata } = body;
+
+    if (!title || !content) {
+      return NextResponse.json(
+        { error: 'title and content are required' },
+        { status: 400 }
+      );
+    }
+
+    const embedding = await getEmbedding(content);
+
+    const { data, error } = await supabase
+      .from('knowledge')
+      .insert({ title, content, source, category, metadata, embedding })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data, { status: 201 });
+  } catch (error) {
+    console.error('Knowledge insert error:', error);
+    return NextResponse.json(
+      { error: 'Failed to insert knowledge entry' },
+      { status: 500 }
+    );
+  }
+}
