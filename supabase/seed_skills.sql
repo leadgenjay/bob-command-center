@@ -68,8 +68,16 @@ INSERT INTO skills (name, description, category, location) VALUES
   ('content-research', 'Find unlimited SHORT-FORM video ideas (Reels, TikToks, YouTube Shorts) via 5 modes. Does NOT scrape long-form YouTube videos.', 'Social Media & Content', 'docs/skills/apify/content-research.md'),
   ('social-content', 'Expert social media strategy for creating, scheduling, and optimizing content for Instagram, LinkedIn, Twitter/X, TikTok with brand consistency', 'Social Media & Content', 'docs/skills/apify/social-content.md'),
   ('ad-creative', 'Generate ad creative images using fal.ai multi-step pipeline (nano-banana, flux-lora, compositing) with Jay photo compositing', 'Social Media & Content', 'docs/skills/fal-ai/ad-creative.md'),
-  ('ad-creative-graphic', 'Generate graphic ad creatives using nano-banana (Gemini text-to-image) with design templates and text overlays', 'Social Media & Content', 'docs/skills/fal-ai/ad-creative-graphic.md'),
+  ('ad-creative-graphic', 'Generate graphic ad creatives using fal.ai Nano Banana 2 (Gemini text-to-image) with design templates and text overlays', 'Social Media & Content', 'docs/skills/fal-ai/ad-creative-graphic.md'),
   ('carousel-post', 'Generate Instagram carousel posts as AI images via fal.ai (Nano Banana 2 + Flux LoRA) with cover photos and inner slide visuals', 'Social Media & Content', 'docs/skills/fal-ai/carousel-post.md'),
   ('youtube-thumbnail', 'Generate YouTube thumbnails using AI pipeline with workflow router, design preferences, and composition rules', 'Social Media & Content', 'docs/skills/fal-ai/youtube-thumbnail.md'),
-  ('social-media-banner', 'Generate social media banner/header/cover images with Jay photo compositing for YouTube, Twitter, LinkedIn, and Facebook', 'Social Media & Content', 'docs/skills/fal-ai/social-media-banner.md')
+  ('social-media-banner', 'Generate social media banner/header/cover images with Jay photo compositing for YouTube, Twitter, LinkedIn, and Facebook', 'Social Media & Content', 'docs/skills/fal-ai/social-media-banner.md'),
+
+  -- Scripting
+  ('short-form-script', 'Script Instagram Reels and TikTok talking-head videos (15-90s) with hooks from a 100-hook database, teleprompter scripts, and production briefs', 'Scripting', 'docs/skills/scripting/short-form-script.md'),
+  ('youtube-script', 'Full YouTube script pipeline: keyword research, competitor analysis via Apify, retention-optimized writing, thumbnail creation, and SEO optimization', 'Scripting', 'docs/skills/scripting/youtube-script.md'),
+  ('kinetic-text-ad', 'Create kinetic typography video ad scripts for Meta/Instagram Reels with beat-by-beat timing, animation cues, and VO direction', 'Scripting', 'docs/skills/scripting/kinetic-text-ad.md'),
+
+  -- Research & Scraping
+  ('yt-longtail', 'Discover high-opportunity, low-competition YouTube keywords with volume estimation, competition scoring, and channel authority assessment', 'Research & Scraping', 'docs/skills/research/yt-longtail.md')
 ON CONFLICT DO NOTHING;

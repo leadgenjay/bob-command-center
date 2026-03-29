@@ -26,12 +26,12 @@ Generate professional social media banners, headers, and cover photos featuring 
 
 ## Platform Presets
 
-| Platform | Full Size | Safe Zone (x, y, w, h) | nano-banana AR | Notes |
+| Platform | Full Size | Safe Zone (x, y, w, h) | fal.ai AR | Notes |
 |----------|-----------|------------------------|----------------|-------|
 | YouTube | 2560x1440 | 507, 508, 1546, 423 | `16:9` | Content outside safe zone cropped on mobile/TV |
 | Twitter/X | 1500x500 | 150, 100, 1200, 300 | `21:9` → crop | Profile photo overlaps bottom-left ~170px |
 | LinkedIn (Personal) | 1584x396 | 317, 60, 950, 276 | `21:9` → crop | Mobile crops 15-20% sides, profile covers bottom-left |
-| LinkedIn (Business) | 1128x191 | 150, 0, 828, 141 | HTML template | 5.9:1 ratio — very wide/short. Company logo overlaps bottom-left (~150px from left, ~50px from bottom). Use HTML template approach, NOT nano-banana |
+| LinkedIn (Business) | 1128x191 | 150, 0, 828, 141 | HTML template | 5.9:1 ratio — very wide/short. Company logo overlaps bottom-left (~150px from left, ~50px from bottom). Use HTML template approach, NOT fal.ai pipeline |
 | Facebook | 820x312 | 90, 0, 640, 312 | `21:9` → crop | Desktop 820x312, mobile 640x360 |
 | Custom | user-defined | center 70% default | nearest AR | User provides width x height |
 
@@ -41,7 +41,7 @@ Generate professional social media banners, headers, and cover photos featuring 
 
 | Step | Tool | Cost | Purpose |
 |------|------|------|---------|
-| 1. Base Scene | `nano-banana` CLI or `generateWithNanoBanana()` | ~$0.10 | Wide panoramic banner scene |
+| 1. Base Scene | `generateWithNanoBanana()` | ~$0.10 | Wide panoramic banner scene |
 | 2. Jay Photo | `generateImage()` (Flux LoRA) | ~$0.03 | Character-consistent Jay photo |
 | 3. Composite | `editWithNanoBanana()` | ~$0.10 | Place Jay naturally in scene |
 | 4. Crop + Safe Zone | `scripts/banner-safe-zone.mjs` | $0 | Exact dimensions + preview overlay |
@@ -52,14 +52,6 @@ Generate professional social media banners, headers, and cover photos featuring 
 
 Generate a wide panoramic scene with space for Jay.
 
-```bash
-nano-banana "wide panoramic banner scene, dark background #0D0D0D, subtle hot pink #ED0D51 accent lighting, \
-person-shaped empty space in the right third of the frame, [USER SCENE DESCRIPTION], \
-cinematic wide-angle composition, atmospheric depth, high production value" \
-  -a 16:9 -s 2K -d output/banners/youtube/ -o banner-scene
-```
-
-Or via API:
 ```typescript
 import { generateWithNanoBanana } from '@/lib/fal'
 
@@ -172,7 +164,7 @@ node scripts/banner-safe-zone.mjs \
 When the user provides arbitrary dimensions (e.g., 1920x400 website hero):
 
 1. Calculate ratio: `width / height`
-2. Map to nearest nano-banana AR:
+2. Map to nearest fal.ai AR:
    - ratio <= 1.5 → `4:3`
    - ratio <= 1.9 → `16:9`
    - ratio > 1.9 → `21:9`
@@ -288,14 +280,21 @@ All logos have been processed to transparent PNGs (white backgrounds removed via
 - `jay-speaking-real.jpg` — real photo, speaking/pointing pose, 666x1000 (preferred)
 - `jay-speaking.png` — AI-generated, white bg, 1024x1024 (fallback)
 
-**Jay photo background removal** — Use nano-banana 2 CLI (NOT ImageMagick):
-```bash
-nano-banana "Remove the background completely from this photo of a man. Replace the background with solid flat light gray color hex F8F8F8. Keep the person exactly as they are with all details preserved. The output should have a clean, uniform F8F8F8 background." \
-  -r public/photos/jay-speaking-real.jpg -o jay-banner-bg-removed \
-  -d output/banners/linkedin-business/ -s 1K -a 3:4
+**Jay photo background removal** — Use fal.ai Nano Banana 2 Edit (NOT ImageMagick):
+```typescript
+import { editWithNanoBanana, uploadToFalStorage } from '@/lib/fal'
+
+const jayUrl = await uploadToFalStorage(jayBuffer, 'jay.jpg', 'image/jpeg')
+const result = await editWithNanoBanana({
+  image_urls: [jayUrl],
+  prompt: "Remove the background completely from this photo of a man. Replace the background with solid flat light gray color hex F8F8F8. Keep the person exactly as they are with all details preserved. The output should have a clean, uniform F8F8F8 background.",
+  aspect_ratio: "3:4",
+  resolution: "1K",
+})
+// Save to output/banners/linkedin-business/jay-banner-bg-removed.png
 ```
 - NEVER use ImageMagick fuzz/opaque — creates white artifacts around skin tones
-- nb2 produces clean AI-powered background removal without artifacts
+- Nano Banana 2 produces clean AI-powered background removal without artifacts
 - Match the replacement bg color to the banner's bg color (e.g., `#F8F8F8` for light banners)
 
 **LGJ brand logo**: `public/brand/lgj-logo.webp` — use for top-left branding with `mix-blend-mode: multiply` on light backgrounds
@@ -399,9 +398,9 @@ CSS-only implementation (no external assets needed):
 1. User triggers skill ("make me a YouTube banner" / "create a LinkedIn header")
 2. Ask: **Which platform?** → present preset table or accept custom dimensions
 3. Ask: **Describe the banner** → scene, mood, message
-4. **Choose approach:** structured layout → HTML template, atmospheric → nano-banana
+4. **Choose approach:** structured layout → HTML template, atmospheric → fal.ai pipeline
 5. For HTML: generate Jay photo if needed → build template → screenshot → safe zone
-6. For nano-banana: run Steps 1-4 (scene + Jay + composite + crop)
+6. For fal.ai: run Steps 1-4 (scene + Jay + composite + crop)
 7. Open preview in Preview.app for review
 8. If approved, `-final.png` is ready for upload
 
@@ -414,7 +413,7 @@ Before delivering:
 - [ ] Safe zone preview shows key content (Jay's face, headline) inside dashed rectangle
 - [ ] Jay photo bottom-anchored, right-aligned, no cropping of face
 - [ ] Text is legible at actual platform display size
-- [ ] Background matches chosen approach (light for HTML, dark for nano-banana)
+- [ ] Background matches chosen approach (light for HTML, dark for fal.ai)
 - [ ] All logos in strip are recognizable at small size
 - [ ] Opened in Preview.app for final visual check
 - [ ] Both `-final.png` and `-preview.png` saved in output directory

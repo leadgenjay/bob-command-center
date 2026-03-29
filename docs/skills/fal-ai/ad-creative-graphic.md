@@ -1,14 +1,14 @@
 ---
 name: ad-creative-graphic
 version: 2.0.0
-description: "Generate graphic ad creatives using nano-banana (Gemini text-to-image) with prompt engineering. ~$0.07/image. This skill should be used when the user wants to create a graphic ad, simple ad, ad template, ad with a button, Meta ad image, comparison ad, social proof ad, feature grid ad, or any non-photorealistic ad creative. Also use when the user mentions 'graphic ad,' 'simple ad,' 'ad template,' 'ad with button,' 'Meta ad image,' 'text ad image,' 'bold ad,' or 'ad with CTA.'"
+description: "Generate graphic ad creatives using fal.ai Nano Banana 2 (Gemini text-to-image) with prompt engineering. ~$0.07/image. This skill should be used when the user wants to create a graphic ad, simple ad, ad template, ad with a button, Meta ad image, comparison ad, social proof ad, feature grid ad, or any non-photorealistic ad creative. Also use when the user mentions 'graphic ad,' 'simple ad,' 'ad template,' 'ad with button,' 'Meta ad image,' 'text ad image,' 'bold ad,' or 'ad with CTA.'"
 category: "Image Generation"
-tools: ["nano-banana CLI (Gemini text-to-image)", "fal.ai Flux LoRA (Jay photos)"]
+tools: ["fal.ai (Nano Banana 2, Flux LoRA)"]
 ---
 
 # Graphic Ad Creative Generator
 
-Generate professional Meta/Instagram ad images using **nano-banana** (Gemini text-to-image). ~$0.07/image at 1K, ~$0.10 at 2K.
+Generate professional Meta/Instagram ad images using **fal.ai Nano Banana 2** (Gemini text-to-image). ~$0.07/image at 1K, ~$0.10 at 2K.
 
 ## When to Use This Skill vs `ad-creative`
 
@@ -17,7 +17,7 @@ Generate professional Meta/Instagram ad images using **nano-banana** (Gemini tex
 | Bold text, CTA buttons, icons | Photorealistic scenes |
 | Comparison layouts | Jay composited into photos |
 | Feature grids, social proof | Lifestyle/product photography |
-| **~$0.07/image via nano-banana** | ~$1.50/campaign via fal.ai |
+| **~$0.07/image via fal.ai** | ~$1.50/campaign via fal.ai pipeline |
 
 ## Before Starting
 
@@ -32,7 +32,7 @@ Generate professional Meta/Instagram ad images using **nano-banana** (Gemini tex
 | Funnel stage | ToF (awareness), MoF (consideration), BoF (conversion) |
 | Key message/headline | What's the main text? |
 | Format | 4:5 portrait (default), 1:1 square, 9:16 story |
-| Reference image? | Competitor ad to remix with `-r` flag |
+| Reference image? | Competitor ad to remix as reference |
 
 ---
 
@@ -95,20 +95,39 @@ Use the funnel stage guide above. Suggest 1-2 options with reasoning.
 - CTA: Action verb + benefit ("GET STARTED FREE", "SEE HOW IT WORKS")
 - Check against CLAUDE.md banned words list
 
-### Step 4: Construct Nano-Banana Prompt
+### Step 4: Construct Image Prompt
 Use the appropriate **Prompt Template** below. Fill in placeholders from the brief.
 
 ### Step 5: Generate Image
-```bash
-nano-banana "PROMPT" -a 4:5 -s 1K -d output/ads/graphic/ -o <descriptive-name>
+
+```typescript
+import { generateWithNanoBanana } from '@/lib/fal'
+
+const result = await generateWithNanoBanana({
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",   // 4:5 portrait default, 1:1 square, 9:16 story
+  resolution: "1K",       // 1K default, 2K only for production-grade
+  num_images: 1,
+})
+// Save to output/ads/graphic/<descriptive-name>.png
 ```
 
-**CLI flags:**
-- `-a 4:5` — aspect ratio (4:5 portrait default, 1:1 square, 9:16 story)
-- `-s 1K` — size (1K default, 2K only when user explicitly asks for production-grade)
-- `-d output/ads/graphic/` — output directory
-- `-o name` — output filename (no extension)
-- `-r reference.png` — reference image for style remixing
+**Parameters:**
+- `aspect_ratio` — `"4:5"` portrait (default), `"1:1"` square, `"9:16"` story
+- `resolution` — `"1K"` default, `"2K"` only when user explicitly asks for production-grade
+- `num_images` — number of variations to generate
+
+**For remixing with a reference image**, use `editWithNanoBanana()`:
+```typescript
+import { editWithNanoBanana, uploadToFalStorage } from '@/lib/fal'
+
+const result = await editWithNanoBanana({
+  image_urls: [referenceUrl],
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
+```
 
 ### Step 6: Review & Refine
 Open output in Preview.app (`open -a Preview output/ads/graphic/<name>.png`). Check against Design Quality Rules below. If issues found, edit the prompt and regenerate.
@@ -200,8 +219,14 @@ Hot pink pill-shaped CTA button '[CTA_TEXT]' at the bottom center with white tex
 Clean modern editorial typography, no gradients, no decorative filler, no numbered badges or circles.
 ```
 
-```bash
-nano-banana "PROMPT" -r path/to/win-screenshot.png -a 4:5 -s 1K -d output/ads/social-proof/
+```typescript
+const result = await editWithNanoBanana({
+  image_urls: [screenshotUrl],
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
+// Save to output/ads/social-proof/
 ```
 
 ### Screenshot Social Proof — Device Mockup (Approved Style)
@@ -223,12 +248,15 @@ Clean modern editorial typography, no gradients, no decorative filler, no floati
 
 Devices: `MacBook Pro` (landscape screenshots), `iPhone 15 Pro` (portrait/square screenshots)
 
-```bash
-# Landscape screenshot on MacBook
-nano-banana "PROMPT" -r path/to/win-screenshot.png -a 4:5 -s 1K -d output/ads/social-proof/
-
-# Portrait screenshot on iPhone
-nano-banana "PROMPT" -r path/to/win-screenshot.png -a 4:5 -s 1K -d output/ads/social-proof/
+```typescript
+// Both landscape (MacBook) and portrait (iPhone) use the same API call
+const result = await editWithNanoBanana({
+  image_urls: [screenshotUrl],
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
+// Save to output/ads/social-proof/
 ```
 
 ### Founder + Proof Ad (Approved Style)
@@ -270,12 +298,23 @@ Hot pink pill-shaped CTA button '[CTA_TEXT]' at the bottom center with white tex
 Clean modern editorial typography, no gradients, no decorative filler, no floating UI elements, no numbered badges or circles.
 ```
 
-```bash
-# Well-known UI proof (Google Calendar, Slack, etc.)
-nano-banana "PROMPT" -r public/photos/jay-pointing.png -a 4:5 -s 1K -d output/ads/founder/
+```typescript
+// Well-known UI proof (Google Calendar, Slack, etc.) — single reference
+const result = await editWithNanoBanana({
+  image_urls: [jayPhotoUrl],
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
 
-# Real dashboard proof (two -r references)
-nano-banana "PROMPT" -r public/photos/jay-professional.png -r path/to/dashboard.png -a 4:5 -s 1K -d output/ads/founder/
+// Real dashboard proof — two references
+const result = await editWithNanoBanana({
+  image_urls: [jayPhotoUrl, dashboardUrl],
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
+// Save to output/ads/founder/
 ```
 
 **Jay photos available:** `public/photos/jay-headshot.png`, `jay-pointing.png`, `jay-professional.png`, `jay-cinematic.png`, `jay-excited.png` (all 1024×1024, Flux Lora)
@@ -302,8 +341,14 @@ Hot pink pill-shaped CTA button '[CTA_TEXT]' at the bottom with white text.
 Clean modern editorial typography, no gradients, no stock photos, no decorative filler.
 ```
 
-```bash
-nano-banana "PROMPT" -r public/photos/jay-headshot.png -a 4:5 -s 1K -d output/ads/graphic/ -o tweet-ad
+```typescript
+const result = await editWithNanoBanana({
+  image_urls: [jayHeadshotUrl],  // public/photos/jay-headshot.png
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
+// Save to output/ads/graphic/tweet-ad.png
 ```
 
 ### Minimal Text — Whiteboard/Notepad
@@ -390,14 +435,21 @@ Clean modern editorial typography, no gradients, no stock photos, no decorative 
 - "screenshot of a real Slack DM or iMessage" — makes testimonials look authentic
 
 ### Reference Image Strategy
-Use `-r reference.png` when:
+Use `editWithNanoBanana()` with a reference image when:
 - Remixing a proven competitor ad pattern
 - Matching a specific layout/composition style
 - Iterating on a previous generation that was close
 
-```bash
-# Remix a competitor ad with our brand
-nano-banana "PROMPT" -r output/ads/research/competitor-ad.png -a 4:5 -s 1K -d output/ads/graphic/
+```typescript
+// Remix a competitor ad with our brand
+const refUrl = await uploadToFalStorage(competitorBuffer, 'ref.png', 'image/png')
+const result = await editWithNanoBanana({
+  image_urls: [refUrl],
+  prompt: "PROMPT",
+  aspect_ratio: "4:5",
+  resolution: "1K",
+})
+// Save to output/ads/graphic/
 ```
 
 ---
@@ -519,9 +571,13 @@ For A/B testing, create 2-3 variations per ad:
 2. **Format variation:** Same copy, different aspect ratio (4:5 + 1:1)
 3. **Model variation:** Same prompt, flash vs pro model (`-m pro`)
 
-Generate all variations in sequence:
-```bash
-nano-banana "PROMPT_V1" -a 4:5 -s 1K -d output/ads/graphic/ -o ad-v1
-nano-banana "PROMPT_V2" -a 4:5 -s 1K -d output/ads/graphic/ -o ad-v2
-nano-banana "PROMPT_V1" -a 1:1 -s 1K -d output/ads/graphic/ -o ad-v1-square
+Generate all variations via API:
+```typescript
+// Copy variation — different headline
+const v1 = await generateWithNanoBanana({ prompt: "PROMPT_V1", aspect_ratio: "4:5", resolution: "1K" })
+const v2 = await generateWithNanoBanana({ prompt: "PROMPT_V2", aspect_ratio: "4:5", resolution: "1K" })
+
+// Format variation — same copy, different ratio
+const v1sq = await generateWithNanoBanana({ prompt: "PROMPT_V1", aspect_ratio: "1:1", resolution: "1K" })
+// Save to output/ads/graphic/ as ad-v1.png, ad-v2.png, ad-v1-square.png
 ```

@@ -82,13 +82,21 @@ const FALLBACK_SKILLS: Skill[] = [
   { name: 'content-research', description: 'Find unlimited SHORT-FORM video ideas (Reels, TikToks, YouTube Shorts) via 5 modes. Does NOT scrape long-form YouTube videos.', category: 'Social Media & Content', location: 'docs/skills/apify/content-research.md' },
   { name: 'social-content', description: 'Expert social media strategy for creating, scheduling, and optimizing content for Instagram, LinkedIn, Twitter/X, TikTok with brand consistency', category: 'Social Media & Content', location: 'docs/skills/apify/social-content.md' },
   { name: 'ad-creative', description: 'Generate ad creative images using fal.ai multi-step pipeline (nano-banana, flux-lora, compositing) with Jay photo compositing', category: 'Social Media & Content', location: 'docs/skills/fal-ai/ad-creative.md' },
-  { name: 'ad-creative-graphic', description: 'Generate graphic ad creatives using nano-banana (Gemini text-to-image) with design templates and text overlays', category: 'Social Media & Content', location: 'docs/skills/fal-ai/ad-creative-graphic.md' },
+  { name: 'ad-creative-graphic', description: 'Generate graphic ad creatives using fal.ai Nano Banana 2 (Gemini text-to-image) with design templates and text overlays', category: 'Social Media & Content', location: 'docs/skills/fal-ai/ad-creative-graphic.md' },
   { name: 'carousel-post', description: 'Generate Instagram carousel posts as AI images via fal.ai (Nano Banana 2 + Flux LoRA) with cover photos and inner slide visuals', category: 'Social Media & Content', location: 'docs/skills/fal-ai/carousel-post.md' },
   { name: 'youtube-thumbnail', description: 'Generate YouTube thumbnails using AI pipeline with workflow router, design preferences, and composition rules', category: 'Social Media & Content', location: 'docs/skills/fal-ai/youtube-thumbnail.md' },
   { name: 'social-media-banner', description: 'Generate social media banner/header/cover images with Jay photo compositing for YouTube, Twitter, LinkedIn, and Facebook', category: 'Social Media & Content', location: 'docs/skills/fal-ai/social-media-banner.md' },
+
+  // Scripting
+  { name: 'short-form-script', description: 'Script Instagram Reels and TikTok talking-head videos (15-90s) with hooks from a 100-hook database, teleprompter scripts, and production briefs', category: 'Scripting', location: 'docs/skills/scripting/short-form-script.md' },
+  { name: 'youtube-script', description: 'Full YouTube script pipeline: keyword research, competitor analysis via Apify, retention-optimized writing, thumbnail creation, and SEO optimization', category: 'Scripting', location: 'docs/skills/scripting/youtube-script.md' },
+  { name: 'kinetic-text-ad', description: 'Create kinetic typography video ad scripts for Meta/Instagram Reels with beat-by-beat timing, animation cues, and VO direction', category: 'Scripting', location: 'docs/skills/scripting/kinetic-text-ad.md' },
+
+  // Research & Scraping
+  { name: 'yt-longtail', description: 'Discover high-opportunity, low-competition YouTube keywords with volume estimation, competition scoring, and channel authority assessment', category: 'Research & Scraping', location: 'docs/skills/research/yt-longtail.md' },
 ];
 
-const CATEGORIES = ['All', 'System & Productivity', 'Communication', 'Google Workspace', 'AI and Content', 'Business', 'Ads and Marketing', 'n8n', 'Social Media & Content'];
+const CATEGORIES = ['All', 'System & Productivity', 'Communication', 'Google Workspace', 'AI and Content', 'Business', 'Ads and Marketing', 'n8n', 'Social Media & Content', 'Scripting', 'Research & Scraping'];
 
 export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([]);

@@ -276,7 +276,7 @@ For generating a full campaign's worth of creatives:
 
 | Skill | When to Use |
 |-------|-------------|
-| `nano-banana` | **Standalone image generation without Jay or the full pipeline** — Gemini CLI for quick images, transparent assets, style transfer, mockups (free with paid Google account) |
+| `ad-creative-graphic` | **Graphic/text-based ads** — bold headlines, CTA buttons, comparison layouts, feature grids via fal.ai Nano Banana 2 (~$0.07/image) |
 | `paid-ads` | Campaign strategy, audience targeting, optimization, reporting |
 | `canvas-design` | Post-generation overlays and graphic design work |
 | `conversion-copywriting` | Ad copy for text fields (primary text, headline, description) |

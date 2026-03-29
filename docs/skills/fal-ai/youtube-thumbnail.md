@@ -3,7 +3,7 @@ name: youtube-thumbnail
 version: 1.0.0
 description: "Generate YouTube thumbnails using the AI pipeline. This skill should be used when the user wants to create a YouTube thumbnail, face-swap a thumbnail, remix a competitor thumbnail, or research competitor thumbnails. Also use when the user mentions 'thumbnail,' 'YouTube thumbnail,' 'face-swap thumbnail,' 'body swap thumbnail,' 'thumbnail concept,' 'generate thumbnail,' 'remix thumbnail,' or 'competitor thumbnail.'"
 category: "Image Generation"
-tools: ["fal.ai (Nano Banana 2, Flux LoRA)", "nano-banana CLI", "Apify MCP (competitor research)"]
+tools: ["fal.ai (Nano Banana 2, Flux LoRA)", "Apify MCP (competitor research)"]
 ---
 
 # YouTube Thumbnail — Lead Gen Jay
@@ -168,8 +168,17 @@ Present as: "Here are 3 changes to differentiate this thumbnail: [list]. Which d
 
 ### Step B: Generate Remix
 
-```bash
-nano-banana "[differentiation prompt]" -r [source-thumb-path] -a 16:9 -s 2K -d output/thumbnails/ -o [name]-remix
+```typescript
+import { editWithNanoBanana, uploadToFalStorage } from '@/lib/fal'
+
+const sourceUrl = await uploadToFalStorage(sourceBuffer, 'source.png', 'image/png')
+const result = await editWithNanoBanana({
+  image_urls: [sourceUrl],
+  prompt: "[differentiation prompt]",
+  aspect_ratio: "16:9",
+  resolution: "2K",
+})
+// Save to output/thumbnails/[name]-remix.png
 ```
 
 **Prompt formula — use explicit KEEP vs CHANGE structure:**
@@ -187,7 +196,7 @@ CHANGE:
 clean professional look, 16:9
 ```
 
-**Why KEEP/CHANGE matters:** Generic prompts don't override the reference image enough. You must explicitly call out what to preserve and what to change using numbered lists and CAPITALIZED emphasis. Without this structure, nano-banana will reproduce the reference too closely.
+**Why KEEP/CHANGE matters:** Generic prompts don't override the reference image enough. You must explicitly call out what to preserve and what to change using numbered lists and CAPITALIZED emphasis. Without this structure, fal.ai will reproduce the reference too closely.
 
 **Rules:**
 - Keep the composition/layout from the original (person placement, text zones)
@@ -221,21 +230,36 @@ Available logos:
 | `openclaw icon.png` | OpenClaw |
 
 **Workflow for logo insertion:**
-1. Generate the remix via `nano-banana` first (with a placeholder text like "claude code" in the prompt)
-2. Then use `nano-banana` edit mode to composite the real logo onto the remix:
-```bash
-nano-banana "[instruction to place logo — KEEP the logo EXACTLY as-is, do not recolor or modify]" -r [remix-path] -r "/Users/jayfeldman/Nextcloud/AI logos/[logo-file]" -a 16:9 -s 2K -d output/thumbnails/ -o [name]-remix-logo
+1. Generate the remix via `editWithNanoBanana()` first (with a placeholder text like "claude code" in the prompt)
+2. Then use `editWithNanoBanana()` to composite the real logo onto the remix:
+```typescript
+const remixUrl = await uploadToFalStorage(remixBuffer, 'remix.png', 'image/png')
+const logoUrl = await uploadToFalStorage(logoBuffer, 'logo.png', 'image/png')
+const result = await editWithNanoBanana({
+  image_urls: [remixUrl, logoUrl],
+  prompt: "[instruction to place logo — KEEP the logo EXACTLY as-is, do not recolor or modify]",
+  aspect_ratio: "16:9",
+  resolution: "2K",
+})
+// Save to output/thumbnails/[name]-remix-logo.png
 ```
-3. Or pass the logo as a second `-r` reference during the initial remix generation
+3. Or pass the logo as a second reference during the initial remix generation
 4. **Always include in the prompt:** "KEEP the logo EXACTLY as-is — do not recolor, tint, or modify the logo in any way"
 
 ### Step C: Iterative Reference Chaining (for v2+ iterations)
 
 If the first remix (v1) gets some elements right but others wrong, **use v1 as the -r reference for v2** instead of going back to the original competitor thumbnail. This preserves the good elements while allowing targeted fixes.
 
-```bash
-# v2 uses v1 as reference (NOT the original competitor thumbnail)
-nano-banana "[KEEP/CHANGE prompt targeting v1's issues]" -r output/thumbnails/[name]-remix-v1.png -a 16:9 -s 2K -d output/thumbnails/ -o [name]-remix-v2
+```typescript
+// v2 uses v1 as reference (NOT the original competitor thumbnail)
+const v1Url = await uploadToFalStorage(v1Buffer, 'v1.png', 'image/png')
+const result = await editWithNanoBanana({
+  image_urls: [v1Url],
+  prompt: "[KEEP/CHANGE prompt targeting v1's issues]",
+  aspect_ratio: "16:9",
+  resolution: "2K",
+})
+// Save to output/thumbnails/[name]-remix-v2.png
 ```
 
 **When to chain:**
@@ -294,7 +318,7 @@ Present ranked candidates with assessment notes. User selects which to remix.
 
 Follow the **Remix Differentiation** section above:
 1. **Propose 3 changes** (color, background, element) via `AskUserQuestion`
-2. **Generate remix** via `nano-banana` with `-r` referencing the selected competitor thumbnail
+2. **Generate remix** via `editWithNanoBanana()` with the selected competitor thumbnail as reference
 
 ### Step 5: Face-Swap
 
@@ -333,7 +357,7 @@ open -a Preview output/thumbnails/source-thumb.jpg
 
 Follow the **Remix Differentiation** section above:
 1. **Propose 3 changes** (color, background, element) via `AskUserQuestion`
-2. **Generate remix** via `nano-banana` with `-r` referencing the downloaded source thumbnail
+2. **Generate remix** via `editWithNanoBanana()` with the downloaded source thumbnail as reference
 
 ### Step 3: Select Jay Preset
 
@@ -440,7 +464,7 @@ When invoked from `/youtube-script`:
 | Skill | Relationship |
 |-------|-------------|
 | `youtube-script` | Full video pipeline — calls this skill for thumbnails |
-| `nano-banana` | Standalone image generation (lower level) |
+| `ad-creative-graphic` | Graphic ad images via fal.ai Nano Banana 2 |
 | `ad-creative` | Ad images with Jay (different pipeline, different aspect ratios) |
 | `generate-jay-photo.mjs` | Standalone Jay photo generation script |
 
