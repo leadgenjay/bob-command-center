@@ -74,9 +74,21 @@ const FALLBACK_SKILLS: Skill[] = [
   { name: 'n8n-node-configuration', description: 'Operation-aware node configuration guidance: required fields, dependencies, common patterns by node type', category: 'n8n', location: '~/.clawdbot/workspace/skills/n8n/n8n-node-configuration/SKILL.md' },
   { name: 'n8n-validation-expert', description: 'Interpret n8n validation errors and guide fixing them: error types, profiles, false positives', category: 'n8n', location: '~/.clawdbot/workspace/skills/n8n/n8n-validation-expert/SKILL.md' },
   { name: 'n8n-workflow-patterns', description: 'Proven workflow architectural patterns: webhook processing, HTTP APIs, database operations, AI agents', category: 'n8n', location: '~/.clawdbot/workspace/skills/n8n/n8n-workflow-patterns/SKILL.md' },
+
+  // Social Media & Content
+  { name: 'gohighlevel-cli', description: 'CLI for GoHighLevel CRM/Marketing API — contacts, opportunities, calendars, workflows, conversations, emails, payments, forms, social', category: 'Social Media & Content', location: 'docs/skills/ghl/gohighlevel-cli.md' },
+  { name: 'blotato-publishing', description: 'Multi-platform publishing for Instagram, LinkedIn, Twitter, TikTok, and other social media channels', category: 'Social Media & Content', location: 'docs/skills/blotato/blotato-publishing.md' },
+  { name: 'apify-mcp-guide', description: 'Apify MCP integration for social media scraping (Instagram, TikTok, YouTube, Twitter/X, LinkedIn) and data collection', category: 'Social Media & Content', location: 'docs/skills/apify/apify-mcp-guide.md' },
+  { name: 'content-research', description: 'Find unlimited SHORT-FORM video ideas (Reels, TikToks, YouTube Shorts) via 5 modes. Does NOT scrape long-form YouTube videos.', category: 'Social Media & Content', location: 'docs/skills/apify/content-research.md' },
+  { name: 'social-content', description: 'Expert social media strategy for creating, scheduling, and optimizing content for Instagram, LinkedIn, Twitter/X, TikTok with brand consistency', category: 'Social Media & Content', location: 'docs/skills/apify/social-content.md' },
+  { name: 'ad-creative', description: 'Generate ad creative images using fal.ai multi-step pipeline (nano-banana, flux-lora, compositing) with Jay photo compositing', category: 'Social Media & Content', location: 'docs/skills/fal-ai/ad-creative.md' },
+  { name: 'ad-creative-graphic', description: 'Generate graphic ad creatives using nano-banana (Gemini text-to-image) with design templates and text overlays', category: 'Social Media & Content', location: 'docs/skills/fal-ai/ad-creative-graphic.md' },
+  { name: 'carousel-post', description: 'Generate Instagram carousel posts as AI images via fal.ai (Nano Banana 2 + Flux LoRA) with cover photos and inner slide visuals', category: 'Social Media & Content', location: 'docs/skills/fal-ai/carousel-post.md' },
+  { name: 'youtube-thumbnail', description: 'Generate YouTube thumbnails using AI pipeline with workflow router, design preferences, and composition rules', category: 'Social Media & Content', location: 'docs/skills/fal-ai/youtube-thumbnail.md' },
+  { name: 'social-media-banner', description: 'Generate social media banner/header/cover images with Jay photo compositing for YouTube, Twitter, LinkedIn, and Facebook', category: 'Social Media & Content', location: 'docs/skills/fal-ai/social-media-banner.md' },
 ];
 
-const CATEGORIES = ['All', 'System & Productivity', 'Communication', 'Google Workspace', 'AI and Content', 'Business', 'Ads and Marketing', 'n8n'];
+const CATEGORIES = ['All', 'System & Productivity', 'Communication', 'Google Workspace', 'AI and Content', 'Business', 'Ads and Marketing', 'n8n', 'Social Media & Content'];
 
 export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([]);

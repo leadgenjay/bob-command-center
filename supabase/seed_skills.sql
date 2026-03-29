@@ -59,5 +59,17 @@ INSERT INTO skills (name, description, category, location) VALUES
   ('n8n-mcp-tools-expert', 'Expert guide for n8n-mcp MCP tools: node search, validation, templates, workflow management', 'n8n', '~/.clawdbot/workspace/skills/n8n/n8n-mcp-tools-expert/SKILL.md'),
   ('n8n-node-configuration', 'Operation-aware node configuration guidance: required fields, dependencies, common patterns by node type', 'n8n', '~/.clawdbot/workspace/skills/n8n/n8n-node-configuration/SKILL.md'),
   ('n8n-validation-expert', 'Interpret n8n validation errors and guide fixing them: error types, profiles, false positives', 'n8n', '~/.clawdbot/workspace/skills/n8n/n8n-validation-expert/SKILL.md'),
-  ('n8n-workflow-patterns', 'Proven workflow architectural patterns: webhook processing, HTTP APIs, database operations, AI agents', 'n8n', '~/.clawdbot/workspace/skills/n8n/n8n-workflow-patterns/SKILL.md')
+  ('n8n-workflow-patterns', 'Proven workflow architectural patterns: webhook processing, HTTP APIs, database operations, AI agents', 'n8n', '~/.clawdbot/workspace/skills/n8n/n8n-workflow-patterns/SKILL.md'),
+
+  -- Social Media & Content
+  ('gohighlevel-cli', 'CLI for GoHighLevel CRM/Marketing API — contacts, opportunities, calendars, workflows, conversations, emails, payments, forms, social', 'Social Media & Content', 'docs/skills/ghl/gohighlevel-cli.md'),
+  ('blotato-publishing', 'Multi-platform publishing for Instagram, LinkedIn, Twitter, TikTok, and other social media channels', 'Social Media & Content', 'docs/skills/blotato/blotato-publishing.md'),
+  ('apify-mcp-guide', 'Apify MCP integration for social media scraping (Instagram, TikTok, YouTube, Twitter/X, LinkedIn) and data collection', 'Social Media & Content', 'docs/skills/apify/apify-mcp-guide.md'),
+  ('content-research', 'Find unlimited SHORT-FORM video ideas (Reels, TikToks, YouTube Shorts) via 5 modes. Does NOT scrape long-form YouTube videos.', 'Social Media & Content', 'docs/skills/apify/content-research.md'),
+  ('social-content', 'Expert social media strategy for creating, scheduling, and optimizing content for Instagram, LinkedIn, Twitter/X, TikTok with brand consistency', 'Social Media & Content', 'docs/skills/apify/social-content.md'),
+  ('ad-creative', 'Generate ad creative images using fal.ai multi-step pipeline (nano-banana, flux-lora, compositing) with Jay photo compositing', 'Social Media & Content', 'docs/skills/fal-ai/ad-creative.md'),
+  ('ad-creative-graphic', 'Generate graphic ad creatives using nano-banana (Gemini text-to-image) with design templates and text overlays', 'Social Media & Content', 'docs/skills/fal-ai/ad-creative-graphic.md'),
+  ('carousel-post', 'Generate Instagram carousel posts as AI images via fal.ai (Nano Banana 2 + Flux LoRA) with cover photos and inner slide visuals', 'Social Media & Content', 'docs/skills/fal-ai/carousel-post.md'),
+  ('youtube-thumbnail', 'Generate YouTube thumbnails using AI pipeline with workflow router, design preferences, and composition rules', 'Social Media & Content', 'docs/skills/fal-ai/youtube-thumbnail.md'),
+  ('social-media-banner', 'Generate social media banner/header/cover images with Jay photo compositing for YouTube, Twitter, LinkedIn, and Facebook', 'Social Media & Content', 'docs/skills/fal-ai/social-media-banner.md')
 ON CONFLICT DO NOTHING;
